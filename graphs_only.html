@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Interactive Graphs</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&amp;family=IBM+Plex+Mono:wght@400;600&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&amp;display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #f5f1eb;
+    --bg2: #ede8e0;
+    --ink: #1a1610;
+    --ink2: #3d3830;
+    --ink3: #6b6357;
+    --rule: #c8bfb0;
+    --accent: #2b4a6f;
+    --accent2: #8b2500;
+    --accent3: #2d6a40;
+    --accent4: #7a5200;
+    --card: #faf7f3;
+    --serif: 'Source Serif 4', Georgia, serif;
+    --display: 'Playfair Display', Georgia, serif;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--ink);
+    color: var(--bg);
+    padding: 48px 40px 36px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.04) 39px, rgba(255,255,255,0.04) 40px);
+    pointer-events: none;
+  }
+  .header-inner { max-width: 900px; margin: 0 auto; position: relative; }
+  .header-kicker {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 12px;
+  }
+  header h1 {
+    font-family: var(--display);
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+  }
+  header h1 em {
+    font-style: italic;
+    color: rgba(255,255,255,0.55);
+    display: block;
+    font-size: 0.55em;
+    font-weight: 400;
+    margin-top: 4px;
+    letter-spacing: 0;
+  }
+  .header-meta {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 20px;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .tab-bar {
+    background: var(--ink);
+    border-top: 1px solid rgba(255,255,255,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .tab-bar-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+  }
+  .tab-btn {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.4);
+    padding: 14px 20px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+    white-space: nowrap;
+  }
+  .tab-btn:hover { color: rgba(255,255,255,0.75); }
+  .tab-btn.active { color: #fff; border-bottom-color: #fff; }
+
+  main { max-width: 900px; margin: 0 auto; padding: 48px 24px 80px; }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .controls {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 24px 28px;
+    margin-bottom: 40px;
+  }
+  .controls-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    margin-bottom: 16px;
+  }
+  .controls-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 40px; }
+  @media (max-width: 600px) { .controls-grid { grid-template-columns: 1fr; } }
+  .slider-row { display: flex; align-items: center; gap: 12px; }
+  .slider-label { font-family: var(--mono); font-size: 12px; color: var(--ink3); min-width: 110px; }
+  .slider-row input[type=range] { flex: 1; accent-color: var(--accent); height: 3px; cursor: pointer; }
+  .slider-val { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--accent); min-width: 58px; text-align: right; }
+
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 28px 28px 20px;
+    margin-bottom: 28px;
+  }
+  .chart-title { font-family: var(--display); font-size: 1.15rem; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+  .chart-subtitle { font-family: var(--mono); font-size: 11px; color: var(--ink3); margin-bottom: 20px; }
+  .chart-wrap { position: relative; height: 300px; }
+
+  .paper { max-width: 680px; }
+  .paper-kicker { font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink3); margin-bottom: 8px; }
+  .paper h1 { font-family: var(--display); font-size: clamp(1.6rem, 4vw, 2.4rem); line-height: 1.15; margin-bottom: 6px; }
+  .paper h1 em { font-style: italic; color: var(--ink3); }
+  .paper-date { font-family: var(--mono); font-size: 11px; color: var(--ink3); margin-bottom: 32px; }
+  .paper-intro { font-size: 1.05rem; color: var(--ink2); margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--rule); }
+  .paper-intro strong { color: var(--ink); }
+
+  .paper h2 { font-family: var(--display); font-size: 1.3rem; font-weight: 700; color: var(--accent); margin: 40px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--rule); }
+  .paper h3 { font-family: var(--serif); font-size: 1rem; font-weight: 600; color: var(--ink); margin: 24px 0 8px; }
+  .paper p { margin-bottom: 14px; color: var(--ink2); }
+  .paper ul, .paper ol { margin: 0 0 14px 20px; color: var(--ink2); }
+  .paper li { margin-bottom: 6px; }
+
+  .math-block {
+    background: var(--bg2);
+    border-left: 3px solid var(--accent);
+    padding: 14px 20px;
+    margin: 16px 0;
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--ink);
+    border-radius: 0 3px 3px 0;
+    overflow-x: auto;
+  }
+  .math-boxed {
+    background: var(--ink);
+    color: var(--bg);
+    padding: 16px 24px;
+    font-family: var(--mono);
+    font-size: 14px;
+    margin: 20px 0;
+    border-radius: 3px;
+    text-align: center;
+  }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    margin: 16px 0 24px;
+  }
+  .data-table th {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 2px solid var(--rule);
+  }
+  .data-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--rule);
+    color: var(--ink2);
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--bg2); }
+
+  .warn-box {
+    background: #fdf3f0;
+    border: 1px solid #e8c5bb;
+    border-left: 4px solid var(--accent2);
+    padding: 16px 20px;
+    border-radius: 0 3px 3px 0;
+    margin: 20px 0;
+    font-size: 0.95rem;
+    color: var(--accent2);
+  }
+  .warn-box strong { display: block; margin-bottom: 4px; font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+
+  .info-box {
+    background: #f0f5fa;
+    border: 1px solid #b8cfe0;
+    border-left: 4px solid var(--accent);
+    padding: 16px 20px;
+    border-radius: 0 3px 3px 0;
+    margin: 20px 0;
+    font-size: 0.95rem;
+    color: var(--accent);
+  }
+  .info-box strong { display: block; margin-bottom: 4px; font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+
+  .sign-off {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--rule);
+    font-style: italic;
+    color: var(--ink3);
+    font-size: 0.95rem;
+  }
+  .sign-off .author { font-family: var(--display); font-size: 1.1rem; margin-top: 4px; color: var(--ink); }
+
+  .footnote {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--rule);
+  }
+  .footnote-title { font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink3); margin-bottom: 12px; }
+  .footnote p { font-size: 0.82rem; color: var(--ink3); margin-bottom: 8px; }
+  .footnote a { color: var(--accent); }
+
+  .figure {
+    margin: 24px 0;
+    text-align: center;
+  }
+  .figure img {
+    max-width: 100%;
+    border-radius: 4px;
+    border: 1px solid var(--rule);
+  }
+  .figure-caption {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink3);
+    margin-top: 8px;
+    font-style: italic;
+  }
+
+  .hero-img {
+    width: 100%;
+    max-width: 420px;
+    border-radius: 6px;
+    border: 1px solid var(--rule);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  }
+</style>
+<style>
+/* Minimal wrapper tweaks for graphs-only page */
+body {
+  margin: 0;
+}
+main {
+  padding: 24px;
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+<main>
+<section class="tab-panel" id="tab-charts">
+<div class="controls">
+<div class="controls-title">Parameters</div>
+
+<div class="controls-grid">
+<div class="slider-row">
+<span class="slider-label">Climber m</span>
+<input id="slM" max="150" min="40" oninput="updateAll()" step="5" type="range" value="100"/>
+<span class="slider-val" id="valM">100 kg</span>
+</div>
+<div class="slider-row">
+<span class="slider-label">Board mass M</span>
+<input id="slMb" max="800" min="500" oninput="updateAll()" step="10" type="range" value="500"/>
+<span class="slider-val" id="valMb">500 kg</span>
+</div>
+<div class="slider-row">
+<span class="slider-label">Angle θ</span>
+<input id="slTheta" max="70" min="30" oninput="updateAll()" step="1" type="range" value="50"/>
+<span class="slider-val" id="valTheta">50°</span>
+</div>
+<div class="slider-row">
+<span class="slider-label">Fall height h</span>
+<input id="slH" max="1.5" min="0.1" oninput="updateAll()" step="0.1" type="range" value="0.5"/>
+<span class="slider-val" id="valH">0.5 m</span>
+</div>
+</div>
+</div>
+<div class="chart-card">
+<div class="chart-title">Fig A: Strap Force vs Board Angle</div>
+<div class="chart-subtitle" id="subtitleA">m=100 kg, M=500 kg, p=0.75, φ=10° · dashed line = current θ=50°</div>
+<p style="font-size:0.9rem;color:var(--ink2);margin:0 0 16px;">Flatter board = more force on the straps. Your wall is at 50°. <span style="color:#2b4a6f;font-weight:600;">Blue</span> = static, <span style="color:#8b2500;font-weight:600;">red</span> = worst dynamic move (3× body weight), <span style="color:#7a5200;font-weight:600;">orange dashed</span> = 3× safety factor.</p>
+<div class="chart-wrap"><canvas id="chartA"></canvas></div>
+</div>
+<div class="chart-card">
+<div class="chart-title">Fig B: Strap Force vs Climber Position</div>
+<div class="chart-subtitle" id="subtitleB">θ=50° · position as % of board length from pivot</div>
+<p style="font-size:0.9rem;color:var(--ink2);margin:0 0 16px;">Higher up the board = more leverage = more force on the straps. The line doesn't start at zero because the 500 kg board is pulling on the straps all by itself, even with nobody climbing.</p>
+<div class="chart-wrap"><canvas id="chartB"></canvas></div>
+</div>
+<div class="chart-card">
+<div class="chart-title">Fig C: Impact Force vs Stopping Distance</div>
+<div class="chart-subtitle" id="subtitleC">m=100 kg, h=0.5 m · stiffer straps = much higher forces</div>
+<p style="font-size:0.9rem;color:var(--ink2);margin:0 0 16px;">If someone grabs the board mid-fall, the force depends on how much the system gives before they stop. Less stretch (left side) = massive forces. More stretch (right side) = lower forces. The <span style="color:#2d6a40;font-weight:600;">green dashed line</span> is the 8 kN anchor rating. Anything above it means the anchors could fail.</p>
+<div class="chart-wrap"><canvas id="chartC"></canvas></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+<div class="chart-card" style="margin-bottom:0;">
+<div class="chart-title">Fig D: All Scenarios</div>
+<div class="chart-subtitle">Total strap force at current parameters</div>
+<p style="font-size:0.85rem;color:var(--ink2);margin:0 0 12px;">First few bars are manageable. The last bar (impact catch) towers over everything else.</p>
+<div class="chart-wrap"><canvas id="chartD"></canvas></div>
+</div>
+<div class="chart-card" style="margin-bottom:0;">
+<div class="chart-title">Fig E: Per Anchor Force</div>
+<div class="chart-subtitle">Force per anchor (assumes equal sharing across 3 straps)</div>
+<p style="font-size:0.85rem;color:var(--ink2);margin:0 0 12px;">Same scenarios, divided by 3 for each bolt. <span style="color:#8b2500;font-weight:600;">Red dashed</span> = 8 kN anchor rating. <span style="color:#2b4a6f;font-weight:600;">Blue dashed</span> = 3× safety factor. Above the red line = trouble.</p>
+<div class="chart-wrap"><canvas id="chartE"></canvas></div>
+</div>
+</div>
+</section>
+</main>
+<script>
+const g = 9.81;
+const P = 0.75;  // strap attachment fraction
+const PHI = 10;  // strap angle below horizontal (degrees)
+
+function degRad(deg) { return deg * Math.PI / 180; }
+function cotDeg(deg) { return Math.cos(degRad(deg)) / Math.sin(degRad(deg)); }
+
+// Generalised model: F = (m + M/2) * g * sin(delta) / (p * cos(delta + phi))
+// where delta = 90 - theta
+function generalForce(m, Mb, theta, k) {
+  k = k || 1;
+  const delta = 90 - theta;
+  const sinD = Math.sin(degRad(delta));
+  const cosDphi = Math.cos(degRad(delta + PHI));
+  return (k * m + Mb / 2) * g * sinD / (P * cosDphi);
+}
+
+function impactForce(m, h, x) {
+  const v2 = 2 * g * h;
+  return m * v2 / (2 * x) + m * g;
+}
+
+// Feed impact force into the generalised model to get strap reaction
+function impactStrapForce(m, Mb, h, x, theta) {
+  const Fimp = impactForce(m, h, x);
+  const delta = 90 - theta;
+  const sinD = Math.sin(degRad(delta));
+  const cosDphi = Math.cos(degRad(delta + PHI));
+  // Replace k*m*g with Fimp for the climber term, keep board weight
+  return (Fimp * sinD + Mb * g * 0.5 * sinD) / (P * cosDphi);
+}
+
+const PALETTE = {
+  blue: '#2b4a6f', red: '#8b2500', green: '#2d6a40',
+  orange: '#7a5200', purple: '#5a3e7a',
+  grid: 'rgba(0,0,0,0.07)', tick: '#6b6357',
+};
+
+const chartDefaults = {
+  plugins: {
+    legend: { labels: { font: { family: "'IBM Plex Mono', monospace", size: 11 }, color: '#3d3830', boxWidth: 24, padding: 16 } },
+    tooltip: { titleFont: { family: "'IBM Plex Mono'" }, bodyFont: { family: "'IBM Plex Mono'", size: 11 } }
+  },
+  scales: {
+    x: { grid: { color: PALETTE.grid }, ticks: { font: { family: "'IBM Plex Mono'", size: 10 }, color: PALETTE.tick } },
+    y: { grid: { color: PALETTE.grid }, ticks: { font: { family: "'IBM Plex Mono'", size: 10 }, color: PALETTE.tick } }
+  }
+};
+
+let charts = {};
+
+function makeChart(id, config) {
+  if (charts[id]) charts[id].destroy();
+  charts[id] = new Chart(document.getElementById(id), config);
+}
+
+function getParams() {
+  return {
+    m: +document.getElementById('slM').value,
+    Mb: +document.getElementById('slMb').value,
+    theta: +document.getElementById('slTheta').value,
+    h: +document.getElementById('slH').value
+  };
+}
+
+function updateLabels() {
+  const { m, Mb, theta, h } = getParams();
+  document.getElementById('valM').textContent = m + ' kg';
+  document.getElementById('valMb').textContent = Mb + ' kg';
+  document.getElementById('valTheta').textContent = theta + '°';
+  document.getElementById('valH').textContent = h + ' m';
+  document.getElementById('subtitleA').textContent = `m=${m} kg, M=${Mb} kg, p=0.75, ϕ=10° · dashed = current θ=${theta}°`;
+  document.getElementById('subtitleB').textContent = `θ=${theta}° · m=${m} kg, M=${Mb} kg`;
+  document.getElementById('subtitleC').textContent = `m=${m} kg, h=${h} m · stiffer straps = much higher forces`;
+}
+
+function buildChartA(m, Mb, theta) {
+  const labels = [], statics = [], dynos = [], sf3s = [];
+  for (let t = 30; t <= 70; t++) {
+    labels.push(t);
+    const fs = generalForce(m, Mb, t, 1) / 1000;
+    statics.push(fs);
+    dynos.push(generalForce(m, Mb, t, 3) / 1000);
+    sf3s.push(fs * 3);
+  }
+  makeChart('chartA', {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Static', data: statics, borderColor: PALETTE.blue, borderWidth: 2, pointRadius: 0, tension: 0.3 },
+        { label: 'Dynamic (k=3)', data: dynos, borderColor: PALETTE.red, borderWidth: 2, pointRadius: 0, tension: 0.3 },
+        { label: '3× Safety Factor', data: sf3s, borderColor: PALETTE.orange, borderWidth: 2, borderDash: [6, 3], pointRadius: 0, tension: 0.3 },
+        { label: `θ = ${theta}°`, data: labels.map(l => l === theta ? Math.max(...sf3s) * 1.1 : null), borderColor: 'rgba(0,0,0,0.25)', borderWidth: 1, borderDash: [4,4], pointRadius: 0, spanGaps: false }
+      ]
+    },
+    options: { ...chartDefaults, responsive: true, maintainAspectRatio: false,
+      scales: { ...chartDefaults.scales,
+        x: { ...chartDefaults.scales.x, title: { display: true, text: 'θ (degrees from horizontal)', font: { family: "'IBM Plex Mono'", size: 10 }, color: PALETTE.tick } },
+        y: { ...chartDefaults.scales.y, title: { display: true, text: 'Force (kN)', font: { family: "'IBM Plex Mono'", size: 10 }, color: PALETTE.tick } }
+      }
+    }
+  });
+}
+
+function buildChartB(m, Mb, theta) {
+  const labels = [], statics = [], dynos = [], perAnch = [];
+  const delta = 90 - theta;
+  const sinD = Math.sin(degRad(delta));
+  const cosDphi = Math.cos(degRad(delta + PHI));
+  const L = 3.66; // board length in metres
+  for (let pct = 5; pct <= 100; pct += 5) {
+    const r = (pct / 100) * L;
+    const fs = (m * r + Mb * L / 2) * g * sinD / (P * L * cosDphi) / 1000;
+    const fd = (3 * m * r + Mb * L / 2) * g * sinD / (P * L * cosDphi) / 1000;
+    labels.push(pct);
+    statics.push(fs);
+    dynos.push(fd);
+    perAnch.push(fs / 3);
+  }
+  makeChart('chartB', {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Static total', data: statics, borderColor: PALETTE.blue, borderWidth: 2, pointRadius: 0, tension: 0.3 },
+        { label: 'Dynamic total (k=3)', data: dynos, borderColor: PALETTE.red, borderWidth: 2, pointRadius: 0, tension: 0.3 },
+        { label: 'Static per anchor', data: perAnch, borderColor: PALETTE.green, borderWidth: 2, borderDash: [5, 3], pointRadius: 0, tension: 0.3 }
+      ]
+    },
+    options: { ...chartDefaults, responsive: true, maintainAspectRatio: false,
+      scales: { ...chartDefaults.scales,
+        x: { ...chartDefaults.scales.x, title: { display: true, text: 'Climber position (% of board from pivot)', font: { family: "'IBM Plex Mono'", size: 10 }, color: PALETTE.tick } },
+        y: { ...chartDefaults.scales.y, title: { display: true, text: 'Force (kN)', font: { family: "'IBM Plex Mono'", size: 10 }, color: PALETTE.tick } }
+      }
+    }
+  });
+}
+
+function buildChartC(m, h) {
+  const labels = [], totals = [], perAnch = [];
+  for (let x = 5; x <= 150; x++) {
+    const F = impactForce(m, h, x / 1000) / 1000;
+    labels.push(x);
+    totals.push(Math.min(F, 60));
+    perAnch.push(Math.min(F / 3, 20));
+  }
+  makeChart('chartC', {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Total impact', data: totals, borderColor: PALETTE.red, borderWidth: 2, pointRadius: 0, fill: { target: 'origin', above: 'rgba(139,37,0,0.07)' }, tension: 0.2 },
+        { label: 'Per anchor (÷3)', data: perAnch, borderColor: PALETTE.orange, borderWidth: 2, pointRadius: 0, tension: 0.2 },
+        { label: '8 kN anchor rating', data: labels.map(() => 8), borderColor: PALETTE.green, borderWidth: 1.5, borderDash: [6, 3], pointRadius: 0 }
+      ]
+    },
+    options: { ...chartDefaults, responsive: true, maintainAspectRatio: false,
+      scales: { ...chartDefaults.scales,
+        x: { ...chartDefaults.scales.x, title: { display: true, text: 'Stopping distance x (mm)', font: { family: "'IBM Plex Mono'", size: 10 }, color: PALETTE.tick } },
+        y: { ...chartDefaults.scales.y, title: { display: true, text: 'Force (kN)', font: { family: "'IBM Plex Mono'", size: 10 }, color: PALETTE.tick } }
+      }
+    }
+  });
+}
+
+function buildChartD(m, Mb, theta, h) {
+  const fs = generalForce(m, Mb, theta, 1) / 1000;
+  const data = [
+    { label: 'Static',         val: fs,                                      color: PALETTE.blue },
+    { label: 'k=1.5',          val: generalForce(m, Mb, theta, 1.5) / 1000, color: PALETTE.green },
+    { label: 'k=2',            val: generalForce(m, Mb, theta, 2) / 1000,   color: PALETTE.purple },
+    { label: 'k=3',            val: generalForce(m, Mb, theta, 3) / 1000,   color: PALETTE.orange },
+    { label: '3× SF',          val: fs * 3,                                  color: '#a06000' },
+    { label: 'Impact\nx=50mm', val: impactStrapForce(m, Mb, h, 0.05, theta) / 1000, color: PALETTE.red },
+  ];
+  makeChart('chartD', {
+    type: 'bar',
+    data: {
+      labels: data.map(d => d.label),
+      datasets: [{ label: 'Total force (kN)', data: data.map(d => d.val), backgroundColor: data.map(d => d.color), borderRadius: 3 }]
+    },
+    options: { ...chartDefaults, responsive: true, maintainAspectRatio: false,
+      plugins: { ...chartDefaults.plugins, legend: { display: false } },
+      scales: { ...chartDefaults.scales,
+        y: { ...chartDefaults.scales.y, title: { display: true, text: 'kN', font: { family: "'IBM Plex Mono'", size: 10 }, color: PALETTE.tick } }
+      }
+    }
+  });
+}
+
+function buildChartE(m, Mb, theta, h) {
+  const fs = generalForce(m, Mb, theta, 1) / 1000;
+  const vals = [
+    fs / 3,
+    generalForce(m, Mb, theta, 1.5) / 3000,
+    generalForce(m, Mb, theta, 2) / 3000,
+    generalForce(m, Mb, theta, 3) / 3000,
+    impactStrapForce(m, Mb, h, 0.05, theta) / 3000,
+  ];
+  const colors = vals.map(v => v > 8 ? PALETTE.red : v > 4.58 ? PALETTE.orange : PALETTE.blue);
+  makeChart('chartE', {
+    type: 'bar',
+    data: {
+      labels: ['Static', 'k=1.5', 'k=2', 'k=3', 'Impact\nx=50mm'],
+      datasets: [
+        { label: 'Per anchor (kN)', data: vals, backgroundColor: colors, borderRadius: 3 },
+        { label: '8 kN rating', data: vals.map(() => 8), type: 'line', borderColor: PALETTE.red, borderDash: [6,3], borderWidth: 2, pointRadius: 0, fill: false },
+        { label: '3×SF threshold', data: vals.map(() => 4.58), type: 'line', borderColor: PALETTE.blue, borderDash: [4,4], borderWidth: 1.5, pointRadius: 0, fill: false },
+      ]
+    },
+    options: { ...chartDefaults, responsive: true, maintainAspectRatio: false,
+      scales: { ...chartDefaults.scales,
+        y: { ...chartDefaults.scales.y, title: { display: true, text: 'kN per anchor', font: { family: "'IBM Plex Mono'", size: 10 }, color: PALETTE.tick } }
+      }
+    }
+  });
+}
+
+function updateAll() {
+  const { m, Mb, theta, h } = getParams();
+  updateLabels();
+  buildChartA(m, Mb, theta);
+  buildChartB(m, Mb, theta);
+  buildChartC(m, h);
+  buildChartD(m, Mb, theta, h);
+  buildChartE(m, Mb, theta, h);
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+  if (name === 'charts') {
+    setTimeout(updateAll, 50);
+  }
+}
+
+window.addEventListener('load', () => {
+  updateLabels();
+});
+</script>
+</body>
+</html>
