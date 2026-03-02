@@ -1,607 +1,456 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Interactive Graphs</title>
-<link href="https://fonts.googleapis.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&amp;family=IBM+Plex+Mono:wght@400;600&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&amp;display=swap" rel="stylesheet"/>
-<style>
-  :root {
-    --bg: #f5f1eb;
-    --bg2: #ede8e0;
-    --ink: #1a1610;
-    --ink2: #3d3830;
-    --ink3: #6b6357;
-    --rule: #c8bfb0;
-    --accent: #2b4a6f;
-    --accent2: #8b2500;
-    --accent3: #2d6a40;
-    --accent4: #7a5200;
-    --card: #faf7f3;
-    --serif: 'Source Serif 4', Georgia, serif;
-    --display: 'Playfair Display', Georgia, serif;
-    --mono: 'IBM Plex Mono', monospace;
-  }
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-
-  body {
-    background: var(--bg);
-    color: var(--ink);
-    font-family: var(--serif);
-    font-size: 17px;
-    line-height: 1.7;
-    min-height: 100vh;
-  }
-
-  header {
-    background: var(--ink);
-    color: var(--bg);
-    padding: 48px 40px 36px;
-    position: relative;
-    overflow: hidden;
-  }
-  header::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.04) 39px, rgba(255,255,255,0.04) 40px);
-    pointer-events: none;
-  }
-  .header-inner { max-width: 900px; margin: 0 auto; position: relative; }
-  .header-kicker {
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.45);
-    margin-bottom: 12px;
-  }
-  header h1 {
-    font-family: var(--display);
-    font-size: clamp(2rem, 5vw, 3.4rem);
-    font-weight: 700;
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-    margin-bottom: 10px;
-  }
-  header h1 em {
-    font-style: italic;
-    color: rgba(255,255,255,0.55);
-    display: block;
-    font-size: 0.55em;
-    font-weight: 400;
-    margin-top: 4px;
-    letter-spacing: 0;
-  }
-  .header-meta {
-    font-family: var(--mono);
-    font-size: 12px;
-    color: rgba(255,255,255,0.4);
-    margin-top: 20px;
-    display: flex;
-    gap: 24px;
-    flex-wrap: wrap;
-  }
-
-  .tab-bar {
-    background: var(--ink);
-    border-top: 1px solid rgba(255,255,255,0.1);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .tab-bar-inner {
-    max-width: 900px;
-    margin: 0 auto;
-    display: flex;
-    gap: 0;
-    overflow-x: auto;
-  }
-  .tab-btn {
-    font-family: var(--mono);
-    font-size: 12px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    background: none;
-    border: none;
-    color: rgba(255,255,255,0.4);
-    padding: 14px 20px;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: color 0.2s, border-color 0.2s;
-    white-space: nowrap;
-  }
-  .tab-btn:hover { color: rgba(255,255,255,0.75); }
-  .tab-btn.active { color: #fff; border-bottom-color: #fff; }
-
-  main { max-width: 900px; margin: 0 auto; padding: 48px 24px 80px; }
-
-  .tab-panel { display: none; }
-  .tab-panel.active { display: block; animation: fadeIn 0.3s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-
-  .controls {
-    background: var(--card);
-    border: 1px solid var(--rule);
-    border-radius: 4px;
-    padding: 24px 28px;
-    margin-bottom: 40px;
-  }
-  .controls-title {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--ink3);
-    margin-bottom: 16px;
-  }
-  .controls-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 40px; }
-  @media (max-width: 600px) { .controls-grid { grid-template-columns: 1fr; } }
-  .slider-row { display: flex; align-items: center; gap: 12px; }
-  .slider-label { font-family: var(--mono); font-size: 12px; color: var(--ink3); min-width: 110px; }
-  .slider-row input[type=range] { flex: 1; accent-color: var(--accent); height: 3px; cursor: pointer; }
-  .slider-val { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--accent); min-width: 58px; text-align: right; }
-
-  .chart-card {
-    background: var(--card);
-    border: 1px solid var(--rule);
-    border-radius: 4px;
-    padding: 28px 28px 20px;
-    margin-bottom: 28px;
-  }
-  .chart-title { font-family: var(--display); font-size: 1.15rem; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
-  .chart-subtitle { font-family: var(--mono); font-size: 11px; color: var(--ink3); margin-bottom: 20px; }
-  .chart-wrap { position: relative; height: 300px; }
-
-  .paper { max-width: 680px; }
-  .paper-kicker { font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink3); margin-bottom: 8px; }
-  .paper h1 { font-family: var(--display); font-size: clamp(1.6rem, 4vw, 2.4rem); line-height: 1.15; margin-bottom: 6px; }
-  .paper h1 em { font-style: italic; color: var(--ink3); }
-  .paper-date { font-family: var(--mono); font-size: 11px; color: var(--ink3); margin-bottom: 32px; }
-  .paper-intro { font-size: 1.05rem; color: var(--ink2); margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--rule); }
-  .paper-intro strong { color: var(--ink); }
-
-  .paper h2 { font-family: var(--display); font-size: 1.3rem; font-weight: 700; color: var(--accent); margin: 40px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--rule); }
-  .paper h3 { font-family: var(--serif); font-size: 1rem; font-weight: 600; color: var(--ink); margin: 24px 0 8px; }
-  .paper p { margin-bottom: 14px; color: var(--ink2); }
-  .paper ul, .paper ol { margin: 0 0 14px 20px; color: var(--ink2); }
-  .paper li { margin-bottom: 6px; }
-
-  .math-block {
-    background: var(--bg2);
-    border-left: 3px solid var(--accent);
-    padding: 14px 20px;
-    margin: 16px 0;
-    font-family: var(--mono);
-    font-size: 14px;
-    color: var(--ink);
-    border-radius: 0 3px 3px 0;
-    overflow-x: auto;
-  }
-  .math-boxed {
-    background: var(--ink);
-    color: var(--bg);
-    padding: 16px 24px;
-    font-family: var(--mono);
-    font-size: 14px;
-    margin: 20px 0;
-    border-radius: 3px;
-    text-align: center;
-  }
-
-  .data-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.9rem;
-    margin: 16px 0 24px;
-  }
-  .data-table th {
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--ink3);
-    text-align: left;
-    padding: 8px 12px;
-    border-bottom: 2px solid var(--rule);
-  }
-  .data-table td {
-    padding: 8px 12px;
-    border-bottom: 1px solid var(--rule);
-    color: var(--ink2);
-    font-family: var(--mono);
-    font-size: 13px;
-  }
-  .data-table tr:last-child td { border-bottom: none; }
-  .data-table tr:hover td { background: var(--bg2); }
-
-  .warn-box {
-    background: #fdf3f0;
-    border: 1px solid #e8c5bb;
-    border-left: 4px solid var(--accent2);
-    padding: 16px 20px;
-    border-radius: 0 3px 3px 0;
-    margin: 20px 0;
-    font-size: 0.95rem;
-    color: var(--accent2);
-  }
-  .warn-box strong { display: block; margin-bottom: 4px; font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
-
-  .info-box {
-    background: #f0f5fa;
-    border: 1px solid #b8cfe0;
-    border-left: 4px solid var(--accent);
-    padding: 16px 20px;
-    border-radius: 0 3px 3px 0;
-    margin: 20px 0;
-    font-size: 0.95rem;
-    color: var(--accent);
-  }
-  .info-box strong { display: block; margin-bottom: 4px; font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
-
-  .sign-off {
-    margin-top: 48px;
-    padding-top: 24px;
-    border-top: 1px solid var(--rule);
-    font-style: italic;
-    color: var(--ink3);
-    font-size: 0.95rem;
-  }
-  .sign-off .author { font-family: var(--display); font-size: 1.1rem; margin-top: 4px; color: var(--ink); }
-
-  .footnote {
-    margin-top: 48px;
-    padding-top: 20px;
-    border-top: 1px solid var(--rule);
-  }
-  .footnote-title { font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink3); margin-bottom: 12px; }
-  .footnote p { font-size: 0.82rem; color: var(--ink3); margin-bottom: 8px; }
-  .footnote a { color: var(--accent); }
-
-  .figure {
-    margin: 24px 0;
-    text-align: center;
-  }
-  .figure img {
-    max-width: 100%;
-    border-radius: 4px;
-    border: 1px solid var(--rule);
-  }
-  .figure-caption {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--ink3);
-    margin-top: 8px;
-    font-style: italic;
-  }
-
-  .hero-img {
-    width: 100%;
-    max-width: 420px;
-    border-radius: 6px;
-    border: 1px solid var(--rule);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-  }
-</style>
-<style>
-/* Minimal wrapper tweaks for graphs-only page */
-body {
-  margin: 0;
-}
-main {
-  padding: 24px;
-}
-</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Climbing Wall Force Analysis</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1A1A2E;--accent:#16425B;--sand:#D4A373;--cream:#F8F6F1;--rule:#C9BFA8;--subtle:#6B7280;--warn:#9B2226;--ok:#386641;--bg:#fdfcf9;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;-webkit-text-size-adjust:100%;}
+
+.header{background:var(--accent);color:var(--cream);padding:1.8rem 1.2rem 1.4rem;position:relative;overflow:hidden;}
+.header::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 60px,rgba(255,255,255,0.02) 60px,rgba(255,255,255,0.02) 61px),repeating-linear-gradient(0deg,transparent,transparent 60px,rgba(255,255,255,0.02) 60px,rgba(255,255,255,0.02) 61px);pointer-events:none;}
+.header h1{font-family:'DM Serif Display',serif;font-size:1.6rem;font-weight:400;position:relative;}
+.header p{font-size:0.88rem;opacity:0.75;margin-top:0.2rem;font-weight:300;position:relative;}
+.header .tag{display:inline-block;margin-top:0.5rem;padding:0.2rem 0.6rem;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:0.7rem;position:relative;}
+
+.container{max-width:900px;margin:0 auto;padding:0 1rem 2.5rem;}
+
+.controls-bar{position:sticky;top:0;z-index:100;background:var(--cream);border-bottom:1px solid var(--rule);padding:0.9rem 1rem;box-shadow:0 2px 12px rgba(0,0,0,0.04);}
+.controls-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.7rem 1rem;max-width:900px;margin:0 auto;}
+.control-group label{display:block;font-size:0.62rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--subtle);margin-bottom:0.2rem;}
+.control-group .vd{font-family:'JetBrains Mono',monospace;font-size:0.95rem;font-weight:600;color:var(--accent);margin-bottom:0.15rem;}
+.control-group input[type="range"]{width:100%;height:5px;-webkit-appearance:none;appearance:none;background:var(--rule);border-radius:3px;outline:none;cursor:pointer;}
+.control-group input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);border:2px solid var(--cream);box-shadow:0 1px 3px rgba(0,0,0,0.2);cursor:grab;}
+.control-group input[type="range"]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--accent);border:2px solid var(--cream);box-shadow:0 1px 3px rgba(0,0,0,0.2);cursor:grab;}
+
+.safety-bar{margin:1rem 0 0.4rem;padding:0.8rem 1rem;border-radius:6px;border:1px solid;display:flex;align-items:flex-start;gap:0.8rem;font-size:0.85rem;font-weight:500;transition:all 0.3s;}
+.safety-bar.safe{background:#f0f7f1;border-color:#b8d4bc;color:var(--ok);}
+.safety-bar.caution{background:#fdf6ec;border-color:#e0c98d;color:#8a6914;}
+.safety-bar.danger{background:#fdf0f0;border-color:#e0a0a0;color:var(--warn);}
+.safety-icon{font-size:1.2rem;flex-shrink:0;line-height:1;}
+.safety-detail{font-size:0.75rem;font-weight:400;opacity:0.8;margin-top:0.1rem;}
+
+.equation-box{background:var(--cream);border:1px solid var(--rule);border-radius:6px;padding:1rem 1.2rem;margin:0.8rem 0;}
+.eq-section{margin-bottom:0.8rem;padding-bottom:0.8rem;border-bottom:1px solid var(--rule);}
+.eq-section:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none;}
+.eq-label{font-size:0.62rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--subtle);margin-bottom:0.4rem;}
+.eq-math{overflow-x:auto;padding:0.2rem 0;}
+.eq-result-line{margin-top:0.5rem;display:flex;align-items:center;gap:0.6rem;}
+.eq-arrow{color:var(--subtle);font-size:0.9rem;}
+.eq-result{font-family:'JetBrains Mono',monospace;font-size:1.2rem;font-weight:700;color:var(--accent);}
+.eq-note{font-size:0.7rem;color:var(--subtle);margin-top:0.3rem;font-style:italic;}
+
+.key-figures{display:grid;grid-template-columns:repeat(4,1fr);gap:0.7rem;margin:0.8rem 0;}
+.figure-card{background:white;border:1px solid var(--rule);border-radius:6px;padding:0.7rem 0.8rem;position:relative;overflow:hidden;}
+.figure-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;}
+.figure-card.accent::before{background:var(--accent);}
+.figure-card.sand::before{background:var(--sand);}
+.figure-card.warn::before{background:var(--warn);}
+.figure-card.ok::before{background:var(--ok);}
+.fig-label{font-size:0.6rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--subtle);}
+.fig-value{font-family:'JetBrains Mono',monospace;font-size:1.25rem;font-weight:600;margin:0.1rem 0;}
+.figure-card.accent .fig-value{color:var(--accent);}
+.figure-card.sand .fig-value{color:var(--sand);}
+.figure-card.warn .fig-value{color:var(--warn);}
+.figure-card.ok .fig-value{color:var(--ok);}
+.fig-sub{font-size:0.65rem;color:var(--subtle);}
+
+.info-box{background:var(--cream);border:1px solid var(--rule);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;padding:0.7rem 1rem;margin:0.7rem 0;font-size:0.8rem;line-height:1.65;}
+.info-box strong{color:var(--accent);}
+.info-note{display:flex;align-items:center;gap:0.4rem;margin-top:0.4rem;font-size:0.75rem;color:var(--subtle);}
+.info-note:first-of-type{margin-top:0.2rem;}
+.info-note .icon{font-size:0.9rem;}
+
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-top:0.8rem;}
+.chart-card{background:white;border:1px solid var(--rule);border-radius:6px;padding:1rem 1rem 0.7rem;}
+.chart-card.standalone{margin-top:0.8rem;}
+.chart-card h3{font-family:'DM Serif Display',serif;font-size:0.95rem;font-weight:400;color:var(--accent);margin-bottom:0.1rem;}
+.chart-desc{font-size:0.72rem;color:var(--subtle);margin-bottom:0.5rem;line-height:1.45;}
+.chart-wrap{position:relative;height:180px;} /* slightly shorter to fit two in a row */
+
+.limit-warning{background:#fdf6ec;border:1px solid #e0c98d;color:#8a6914;border-radius:6px;padding:0.6rem 0.9rem;font-size:0.78rem;margin:0.6rem 0;display:none;}
+.limit-warning.visible{display:block;}
+
+@media(max-width:700px){
+  .header{padding:1.4rem 1rem 1.2rem;}.header h1{font-size:1.3rem;}
+  .controls-grid{grid-template-columns:1fr 1fr;gap:0.6rem 0.8rem;}
+  .key-figures{grid-template-columns:1fr 1fr;gap:0.5rem;}
+  .chart-row{grid-template-columns:1fr;}
+  .chart-wrap{height:180px;}.chart-wrap.wide{height:170px;}
+  .figure-card{padding:0.6rem 0.7rem;}.fig-value{font-size:1.1rem;}
+  .equation-box{padding:0.8rem 0.9rem;}.eq-result{font-size:1.05rem;}
+  .chart-card{padding:0.8rem 0.7rem 0.5rem;}
+}
+@media(max-width:400px){
+  .controls-grid{grid-template-columns:1fr;gap:0.5rem;}
+  .controls-bar{padding:0.7rem 0.8rem;}
+  .control-group .vd{font-size:0.85rem;}
+  .chart-wrap{height:160px;}.chart-wrap.wide{height:150px;}
+}
+</style>
 </head>
 <body>
-<main>
-<section class="tab-panel" id="tab-charts">
-<div class="controls">
-<div class="controls-title">Parameters</div>
 
-<div class="controls-grid">
-<div class="slider-row">
-<span class="slider-label">Climber m</span>
-<input id="slM" max="150" min="40" oninput="updateAll()" step="5" type="range" value="100"/>
-<span class="slider-val" id="valM">100 kg</span>
+<div class="header">
+  <h1>Zac's Climbing Wall</h1>
+  <p>Interactive force analysis. Adjust the sliders to explore safety margins.</p>
+  <div class="tag">Engineering estimate · Not a substitute for professional inspection</div>
 </div>
-<div class="slider-row">
-<span class="slider-label">Board mass M</span>
-<input id="slMb" max="800" min="500" oninput="updateAll()" step="10" type="range" value="500"/>
-<span class="slider-val" id="valMb">500 kg</span>
+
+<div class="controls-bar">
+  <div class="controls-grid">
+    <div class="control-group">
+      <label>Climber Mass (m)</label>
+      <div class="vd" id="v-climber">100 kg</div>
+      <input type="range" id="s-climber" min="40" max="150" value="100" step="5">
+    </div>
+    <div class="control-group">
+      <label>Board Mass (M)</label>
+      <div class="vd" id="v-board">500 kg</div>
+      <input type="range" id="s-board" min="200" max="800" value="500" step="25">
+    </div>
+    <div class="control-group">
+      <label>Incline from Horizontal (θ)</label>
+      <div class="vd" id="v-angle">50°</div>
+      <input type="range" id="s-angle" min="20" max="80" value="50" step="1">
+    </div>
+    <div class="control-group">
+      <label>Strap Position (p)</label>
+      <div class="vd" id="v-p">0.75</div>
+      <input type="range" id="s-p" min="50" max="100" value="75" step="1">
+    </div>
+    <div class="control-group">
+      <label>Strap Angle (φ)</label>
+      <div class="vd" id="v-phi">10°</div>
+      <input type="range" id="s-phi" min="0" max="30" value="10" step="1">
+    </div>
+    <div class="control-group">
+      <label>Anchor Rating</label>
+      <div class="vd" id="v-anchor">8 kN</div>
+      <input type="range" id="s-anchor" min="2" max="20" value="8" step="0.5">
+    </div>
+  </div>
 </div>
-<div class="slider-row">
-<span class="slider-label">Angle θ</span>
-<input id="slTheta" max="70" min="30" oninput="updateAll()" step="1" type="range" value="50"/>
-<span class="slider-val" id="valTheta">50°</span>
+
+<div class="container">
+
+  <div id="limit-warning" class="limit-warning">
+    At extreme angles the strap geometry becomes ineffective. The straps cannot hold the board.
+  </div>
+
+  <div id="safety-indicator" class="safety-bar safe">
+    <div class="safety-icon">✓</div>
+    <div>
+      <div id="safety-text">System adequate</div>
+      <div class="safety-detail" id="safety-detail"></div>
+    </div>
+  </div>
+
+  <div class="equation-box">
+    <div class="eq-section">
+      <div class="eq-label">Generalised model (climber at top of board)</div>
+      <div class="eq-math" id="eq-general"></div>
+      <div class="eq-note">Dynamic scenarios multiply the climber's contribution by k: 1.5 (normal), 2 (push‑off), 3 (dyno).</div>
+    </div>
+    <div class="eq-section">
+      <div class="eq-label">With your values</div>
+      <div class="eq-math" id="eq-values"></div>
+      <div class="eq-result-line">
+        <span class="eq-arrow">→</span>
+        <span class="eq-result" id="eq-result">F = 4.58 kN</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="key-figures">
+    <div class="figure-card accent">
+      <div class="fig-label">Static Total</div>
+      <div class="fig-value" id="kf-static"></div>
+      <div class="fig-sub">k = 1</div>
+    </div>
+    <div class="figure-card sand">
+      <div class="fig-label">Per Anchor</div>
+      <div class="fig-value" id="kf-per-anchor"></div>
+      <div class="fig-sub">Static ÷ 3</div>
+    </div>
+    <div class="figure-card warn">
+      <div class="fig-label">Dyno / Anchor</div>
+      <div class="fig-value" id="kf-dyno"></div>
+      <div class="fig-sub">k = 3 ÷ 3</div>
+    </div>
+    <div class="figure-card ok">
+      <div class="fig-label">Safety Factor</div>
+      <div class="fig-value" id="kf-sf"></div>
+      <div class="fig-sub" id="kf-sf-sub"></div>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <strong>Safety factor</strong> = anchor rating ÷ worst per‑anchor demand (dyno, k = 3). It tells you how many times stronger the anchor is than what it actually needs to handle. Above 2.5× is comfortable. 1.5× to 2.5× needs caution. Below 1.5× is not safe.
+    <div class="info-note"><span class="icon">⚠️</span> Per‑anchor values assume perfect load sharing; in practice one strap may carry most of the load.</div>
+    <div class="info-note"><span class="icon">📄</span> Impact catches (Section 7 of the PDF) can reach 18–37 kN total, but are unlikely at typical angles.</div>
+  </div>
+
+  <!-- Bar charts row (unchanged) -->
+  <div class="chart-row">
+    <div class="chart-card">
+      <h3>Strap Force by Scenario</h3>
+      <div class="chart-desc">Total force across all three straps for each loading scenario. Impact scenario not shown (see note above).</div>
+      <div class="chart-wrap"><canvas id="chart-scenarios"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>Per Anchor vs Rating</h3>
+      <div class="chart-desc">Force per anchor vs your chosen anchor rating. Bars turn red if they exceed the limit.</div>
+      <div class="chart-wrap"><canvas id="chart-anchors"></canvas></div>
+    </div>
+  </div>
+
+  <!-- New row: two line charts (force vs θ, force vs p) -->
+  <div class="chart-row">
+    <div class="chart-card">
+      <h3>Force vs Board Angle (θ)</h3>
+      <div class="chart-desc">How total strap force changes as the board tilts. Lower θ = more overhang = more force. The orange line marks your current θ.</div>
+      <div class="chart-wrap"><canvas id="chart-angle"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>Force vs Strap Position (p)</h3>
+      <div class="chart-desc">How total strap force changes as the attachment point moves up the board (p = fraction of board length).</div>
+      <div class="chart-wrap"><canvas id="chart-p"></canvas></div>
+    </div>
+  </div>
+
 </div>
-<div class="slider-row">
-<span class="slider-label">Fall height h</span>
-<input id="slH" max="1.5" min="0.1" oninput="updateAll()" step="0.1" type="range" value="0.5"/>
-<span class="slider-val" id="valH">0.5 m</span>
-</div>
-</div>
-</div>
-<div class="chart-card">
-<div class="chart-title">Fig A: Strap Force vs Board Angle</div>
-<div class="chart-subtitle" id="subtitleA">m=100 kg, M=500 kg, p=0.75, φ=10° · dashed line = current θ=50°</div>
-<p style="font-size:0.9rem;color:var(--ink2);margin:0 0 16px;">Flatter board = more force on the straps. Your wall is at 50°. <span style="color:#2b4a6f;font-weight:600;">Blue</span> = static, <span style="color:#8b2500;font-weight:600;">red</span> = worst dynamic move (3× body weight), <span style="color:#7a5200;font-weight:600;">orange dashed</span> = 3× safety factor.</p>
-<div class="chart-wrap"><canvas id="chartA"></canvas></div>
-</div>
-<div class="chart-card">
-<div class="chart-title">Fig B: Strap Force vs Climber Position</div>
-<div class="chart-subtitle" id="subtitleB">θ=50° · position as % of board length from pivot</div>
-<p style="font-size:0.9rem;color:var(--ink2);margin:0 0 16px;">Higher up the board = more leverage = more force on the straps. The line doesn't start at zero because the 500 kg board is pulling on the straps all by itself, even with nobody climbing.</p>
-<div class="chart-wrap"><canvas id="chartB"></canvas></div>
-</div>
-<div class="chart-card">
-<div class="chart-title">Fig C: Impact Force vs Stopping Distance</div>
-<div class="chart-subtitle" id="subtitleC">m=100 kg, h=0.5 m · stiffer straps = much higher forces</div>
-<p style="font-size:0.9rem;color:var(--ink2);margin:0 0 16px;">If someone grabs the board mid-fall, the force depends on how much the system gives before they stop. Less stretch (left side) = massive forces. More stretch (right side) = lower forces. The <span style="color:#2d6a40;font-weight:600;">green dashed line</span> is the 8 kN anchor rating. Anything above it means the anchors could fail.</p>
-<div class="chart-wrap"><canvas id="chartC"></canvas></div>
-</div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
-<div class="chart-card" style="margin-bottom:0;">
-<div class="chart-title">Fig D: All Scenarios</div>
-<div class="chart-subtitle">Total strap force at current parameters</div>
-<p style="font-size:0.85rem;color:var(--ink2);margin:0 0 12px;">First few bars are manageable. The last bar (impact catch) towers over everything else.</p>
-<div class="chart-wrap"><canvas id="chartD"></canvas></div>
-</div>
-<div class="chart-card" style="margin-bottom:0;">
-<div class="chart-title">Fig E: Per Anchor Force</div>
-<div class="chart-subtitle">Force per anchor (assumes equal sharing across 3 straps)</div>
-<p style="font-size:0.85rem;color:var(--ink2);margin:0 0 12px;">Same scenarios, divided by 3 for each bolt. <span style="color:#8b2500;font-weight:600;">Red dashed</span> = 8 kN anchor rating. <span style="color:#2b4a6f;font-weight:600;">Blue dashed</span> = 3× safety factor. Above the red line = trouble.</p>
-<div class="chart-wrap"><canvas id="chartE"></canvas></div>
-</div>
-</div>
-</section>
-</main>
+
 <script>
-const g = 9.81;
-const P = 0.75;  // strap attachment fraction
-const PHI = 10;  // strap angle below horizontal (degrees)
+const G=9.81,L=3.66;
+let currentTheta=50;
 
-function degRad(deg) { return deg * Math.PI / 180; }
-function cotDeg(deg) { return Math.cos(degRad(deg)) / Math.sin(degRad(deg)); }
+const sl={climber:document.getElementById('s-climber'),board:document.getElementById('s-board'),angle:document.getElementById('s-angle'),p:document.getElementById('s-p'),phi:document.getElementById('s-phi'),anchor:document.getElementById('s-anchor')};
+const dsp={climber:document.getElementById('v-climber'),board:document.getElementById('v-board'),angle:document.getElementById('v-angle'),p:document.getElementById('v-p'),phi:document.getElementById('v-phi'),anchor:document.getElementById('v-anchor')};
 
-// Generalised model: F = (m + M/2) * g * sin(delta) / (p * cos(delta + phi))
-// where delta = 90 - theta
-function generalForce(m, Mb, theta, k) {
-  k = k || 1;
-  const delta = 90 - theta;
-  const sinD = Math.sin(degRad(delta));
-  const cosDphi = Math.cos(degRad(delta + PHI));
-  return (k * m + Mb / 2) * g * sinD / (P * cosDphi);
+function getP(){
+  const theta=+sl.angle.value;
+  return{m:+sl.climber.value,M:+sl.board.value,theta,p:+sl.p.value/100,phi:+sl.phi.value,aR:+sl.anchor.value};
+}
+function rad(d){return d*Math.PI/180;}
+
+// F = (k·m·rF + M/2)·g·cosθ / [p·sin(θ−φ)]
+function calcF(m,M,theta,p,phi,k,rF){
+  const thetaMinusPhi=theta-phi;
+  if(thetaMinusPhi<=5)return null;
+  const num=(k*m*rF+M/2)*G*Math.cos(rad(theta));
+  const den=p*Math.sin(rad(thetaMinusPhi));
+  if(den<0.015)return null;
+  return num/den;
 }
 
-function impactForce(m, h, x) {
-  const v2 = 2 * g * h;
-  return m * v2 / (2 * x) + m * g;
-}
+Chart.defaults.font.family="'DM Sans',sans-serif";
+Chart.defaults.font.size=11;
+Chart.defaults.color='#6B7280';
+Chart.defaults.plugins.legend.labels.usePointStyle=true;
+Chart.defaults.plugins.legend.labels.pointStyle='circle';
+Chart.defaults.plugins.legend.labels.boxWidth=7;
+Chart.defaults.plugins.legend.labels.font={size:10};
 
-// Feed impact force into the generalised model to get strap reaction
-function impactStrapForce(m, Mb, h, x, theta) {
-  const Fimp = impactForce(m, h, x);
-  const delta = 90 - theta;
-  const sinD = Math.sin(degRad(delta));
-  const cosDphi = Math.cos(degRad(delta + PHI));
-  // Replace k*m*g with Fimp for the climber term, keep board weight
-  return (Fimp * sinD + Mb * g * 0.5 * sinD) / (P * cosDphi);
-}
+const CC={accent:'rgb(22,66,91)',accentA:a=>`rgba(22,66,91,${a})`,sand:'rgb(212,163,115)',sandA:a=>`rgba(212,163,115,${a})`,warn:'rgb(155,34,38)',warnA:a=>`rgba(155,34,38,${a})`};
 
-const PALETTE = {
-  blue: '#2b4a6f', red: '#8b2500', green: '#2d6a40',
-  orange: '#7a5200', purple: '#5a3e7a',
-  grid: 'rgba(0,0,0,0.07)', tick: '#6b6357',
-};
-
-const chartDefaults = {
-  plugins: {
-    legend: { labels: { font: { family: "'IBM Plex Mono', monospace", size: 11 }, color: '#3d3830', boxWidth: 24, padding: 16 } },
-    tooltip: { titleFont: { family: "'IBM Plex Mono'" }, bodyFont: { family: "'IBM Plex Mono'", size: 11 } }
-  },
-  scales: {
-    x: { grid: { color: PALETTE.grid }, ticks: { font: { family: "'IBM Plex Mono'", size: 10 }, color: PALETTE.tick } },
-    y: { grid: { color: PALETTE.grid }, ticks: { font: { family: "'IBM Plex Mono'", size: 10 }, color: PALETTE.tick } }
-  }
-};
-
-let charts = {};
-
-function makeChart(id, config) {
-  if (charts[id]) charts[id].destroy();
-  charts[id] = new Chart(document.getElementById(id), config);
-}
-
-function getParams() {
-  return {
-    m: +document.getElementById('slM').value,
-    Mb: +document.getElementById('slMb').value,
-    theta: +document.getElementById('slTheta').value,
-    h: +document.getElementById('slH').value
-  };
-}
-
-function updateLabels() {
-  const { m, Mb, theta, h } = getParams();
-  document.getElementById('valM').textContent = m + ' kg';
-  document.getElementById('valMb').textContent = Mb + ' kg';
-  document.getElementById('valTheta').textContent = theta + '°';
-  document.getElementById('valH').textContent = h + ' m';
-  document.getElementById('subtitleA').textContent = `m=${m} kg, M=${Mb} kg, p=0.75, ϕ=10° · dashed = current θ=${theta}°`;
-  document.getElementById('subtitleB').textContent = `θ=${theta}° · m=${m} kg, M=${Mb} kg`;
-  document.getElementById('subtitleC').textContent = `m=${m} kg, h=${h} m · stiffer straps = much higher forces`;
-}
-
-function buildChartA(m, Mb, theta) {
-  const labels = [], statics = [], dynos = [], sf3s = [];
-  for (let t = 30; t <= 70; t++) {
-    labels.push(t);
-    const fs = generalForce(m, Mb, t, 1) / 1000;
-    statics.push(fs);
-    dynos.push(generalForce(m, Mb, t, 3) / 1000);
-    sf3s.push(fs * 3);
-  }
-  makeChart('chartA', {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        { label: 'Static', data: statics, borderColor: PALETTE.blue, borderWidth: 2, pointRadius: 0, tension: 0.3 },
-        { label: 'Dynamic (k=3)', data: dynos, borderColor: PALETTE.red, borderWidth: 2, pointRadius: 0, tension: 0.3 },
-        { label: '3× Safety Factor', data: sf3s, borderColor: PALETTE.orange, borderWidth: 2, borderDash: [6, 3], pointRadius: 0, tension: 0.3 },
-        { label: `θ = ${theta}°`, data: labels.map(l => l === theta ? Math.max(...sf3s) * 1.1 : null), borderColor: 'rgba(0,0,0,0.25)', borderWidth: 1, borderDash: [4,4], pointRadius: 0, spanGaps: false }
-      ]
-    },
-    options: { ...chartDefaults, responsive: true, maintainAspectRatio: false,
-      scales: { ...chartDefaults.scales,
-        x: { ...chartDefaults.scales.x, title: { display: true, text: 'θ (degrees from horizontal)', font: { family: "'IBM Plex Mono'", size: 10 }, color: PALETTE.tick } },
-        y: { ...chartDefaults.scales.y, title: { display: true, text: 'Force (kN)', font: { family: "'IBM Plex Mono'", size: 10 }, color: PALETTE.tick } }
-      }
-    }
-  });
-}
-
-function buildChartB(m, Mb, theta) {
-  const labels = [], statics = [], dynos = [], perAnch = [];
-  const delta = 90 - theta;
-  const sinD = Math.sin(degRad(delta));
-  const cosDphi = Math.cos(degRad(delta + PHI));
-  const L = 3.66; // board length in metres
-  for (let pct = 5; pct <= 100; pct += 5) {
-    const r = (pct / 100) * L;
-    const fs = (m * r + Mb * L / 2) * g * sinD / (P * L * cosDphi) / 1000;
-    const fd = (3 * m * r + Mb * L / 2) * g * sinD / (P * L * cosDphi) / 1000;
-    labels.push(pct);
-    statics.push(fs);
-    dynos.push(fd);
-    perAnch.push(fs / 3);
-  }
-  makeChart('chartB', {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        { label: 'Static total', data: statics, borderColor: PALETTE.blue, borderWidth: 2, pointRadius: 0, tension: 0.3 },
-        { label: 'Dynamic total (k=3)', data: dynos, borderColor: PALETTE.red, borderWidth: 2, pointRadius: 0, tension: 0.3 },
-        { label: 'Static per anchor', data: perAnch, borderColor: PALETTE.green, borderWidth: 2, borderDash: [5, 3], pointRadius: 0, tension: 0.3 }
-      ]
-    },
-    options: { ...chartDefaults, responsive: true, maintainAspectRatio: false,
-      scales: { ...chartDefaults.scales,
-        x: { ...chartDefaults.scales.x, title: { display: true, text: 'Climber position (% of board from pivot)', font: { family: "'IBM Plex Mono'", size: 10 }, color: PALETTE.tick } },
-        y: { ...chartDefaults.scales.y, title: { display: true, text: 'Force (kN)', font: { family: "'IBM Plex Mono'", size: 10 }, color: PALETTE.tick } }
-      }
-    }
-  });
-}
-
-function buildChartC(m, h) {
-  const labels = [], totals = [], perAnch = [];
-  for (let x = 5; x <= 150; x++) {
-    const F = impactForce(m, h, x / 1000) / 1000;
-    labels.push(x);
-    totals.push(Math.min(F, 60));
-    perAnch.push(Math.min(F / 3, 20));
-  }
-  makeChart('chartC', {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        { label: 'Total impact', data: totals, borderColor: PALETTE.red, borderWidth: 2, pointRadius: 0, fill: { target: 'origin', above: 'rgba(139,37,0,0.07)' }, tension: 0.2 },
-        { label: 'Per anchor (÷3)', data: perAnch, borderColor: PALETTE.orange, borderWidth: 2, pointRadius: 0, tension: 0.2 },
-        { label: '8 kN anchor rating', data: labels.map(() => 8), borderColor: PALETTE.green, borderWidth: 1.5, borderDash: [6, 3], pointRadius: 0 }
-      ]
-    },
-    options: { ...chartDefaults, responsive: true, maintainAspectRatio: false,
-      scales: { ...chartDefaults.scales,
-        x: { ...chartDefaults.scales.x, title: { display: true, text: 'Stopping distance x (mm)', font: { family: "'IBM Plex Mono'", size: 10 }, color: PALETTE.tick } },
-        y: { ...chartDefaults.scales.y, title: { display: true, text: 'Force (kN)', font: { family: "'IBM Plex Mono'", size: 10 }, color: PALETTE.tick } }
-      }
-    }
-  });
-}
-
-function buildChartD(m, Mb, theta, h) {
-  const fs = generalForce(m, Mb, theta, 1) / 1000;
-  const data = [
-    { label: 'Static',         val: fs,                                      color: PALETTE.blue },
-    { label: 'k=1.5',          val: generalForce(m, Mb, theta, 1.5) / 1000, color: PALETTE.green },
-    { label: 'k=2',            val: generalForce(m, Mb, theta, 2) / 1000,   color: PALETTE.purple },
-    { label: 'k=3',            val: generalForce(m, Mb, theta, 3) / 1000,   color: PALETTE.orange },
-    { label: '3× SF',          val: fs * 3,                                  color: '#a06000' },
-    { label: 'Impact\nx=50mm', val: impactStrapForce(m, Mb, h, 0.05, theta) / 1000, color: PALETTE.red },
-  ];
-  makeChart('chartD', {
-    type: 'bar',
-    data: {
-      labels: data.map(d => d.label),
-      datasets: [{ label: 'Total force (kN)', data: data.map(d => d.val), backgroundColor: data.map(d => d.color), borderRadius: 3 }]
-    },
-    options: { ...chartDefaults, responsive: true, maintainAspectRatio: false,
-      plugins: { ...chartDefaults.plugins, legend: { display: false } },
-      scales: { ...chartDefaults.scales,
-        y: { ...chartDefaults.scales.y, title: { display: true, text: 'kN', font: { family: "'IBM Plex Mono'", size: 10 }, color: PALETTE.tick } }
-      }
-    }
-  });
-}
-
-function buildChartE(m, Mb, theta, h) {
-  const fs = generalForce(m, Mb, theta, 1) / 1000;
-  const vals = [
-    fs / 3,
-    generalForce(m, Mb, theta, 1.5) / 3000,
-    generalForce(m, Mb, theta, 2) / 3000,
-    generalForce(m, Mb, theta, 3) / 3000,
-    impactStrapForce(m, Mb, h, 0.05, theta) / 3000,
-  ];
-  const colors = vals.map(v => v > 8 ? PALETTE.red : v > 4.58 ? PALETTE.orange : PALETTE.blue);
-  makeChart('chartE', {
-    type: 'bar',
-    data: {
-      labels: ['Static', 'k=1.5', 'k=2', 'k=3', 'Impact\nx=50mm'],
-      datasets: [
-        { label: 'Per anchor (kN)', data: vals, backgroundColor: colors, borderRadius: 3 },
-        { label: '8 kN rating', data: vals.map(() => 8), type: 'line', borderColor: PALETTE.red, borderDash: [6,3], borderWidth: 2, pointRadius: 0, fill: false },
-        { label: '3×SF threshold', data: vals.map(() => 4.58), type: 'line', borderColor: PALETTE.blue, borderDash: [4,4], borderWidth: 1.5, pointRadius: 0, fill: false },
-      ]
-    },
-    options: { ...chartDefaults, responsive: true, maintainAspectRatio: false,
-      scales: { ...chartDefaults.scales,
-        y: { ...chartDefaults.scales.y, title: { display: true, text: 'kN per anchor', font: { family: "'IBM Plex Mono'", size: 10 }, color: PALETTE.tick } }
-      }
-    }
-  });
-}
-
-function updateAll() {
-  const { m, Mb, theta, h } = getParams();
-  updateLabels();
-  buildChartA(m, Mb, theta);
-  buildChartB(m, Mb, theta);
-  buildChartC(m, h);
-  buildChartD(m, Mb, theta, h);
-  buildChartE(m, Mb, theta, h);
-}
-
-function switchTab(name) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  event.target.classList.add('active');
-  if (name === 'charts') {
-    setTimeout(updateAll, 50);
-  }
-}
-
-window.addEventListener('load', () => {
-  updateLabels();
+// ── Chart 1: Scenarios (bar) ──────────
+const chartScenarios=new Chart(document.getElementById('chart-scenarios'),{
+  type:'bar',
+  data:{labels:['Static\nk = 1','Normal\nk = 1.5','Push off\nk = 2','Dyno\nk = 3'],
+    datasets:[{data:[0,0,0,0],backgroundColor:[CC.accentA(0.55),CC.sandA(0.6),CC.sandA(0.8),CC.warnA(0.65)],borderColor:[CC.accent,CC.sand,CC.sand,CC.warn],borderWidth:1.5,borderRadius:3}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,title:{display:true,text:'Force (kN)',font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{grid:{display:false}}}}
 });
+
+// ── Chart 2: Per anchor (bar + line) ──
+const chartAnchors=new Chart(document.getElementById('chart-anchors'),{
+  type:'bar',
+  data:{labels:['Static\nk = 1','Normal\nk = 1.5','Push off\nk = 2','Dyno\nk = 3'],
+    datasets:[
+      {label:'Per anchor',data:[0,0,0,0],backgroundColor:CC.accentA(0.6),borderColor:CC.accent,borderWidth:1.5,borderRadius:3},
+      {label:'Anchor rating',data:[0,0,0,0],type:'line',borderColor:CC.warn,borderWidth:2,borderDash:[5,3],pointRadius:0,fill:false}
+    ]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,title:{display:true,text:'Force (kN)',font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{grid:{display:false}}}}
+});
+
+// ── Plugin: vertical line at current θ (for angle chart) ──
+const verticalLinePlugin={
+  id:'verticalLine',
+  afterDatasetsDraw(chart){
+    if(chart.canvas.id !== 'chart-angle') return; // only on angle chart
+    const xScale=chart.scales.x;
+    const yScale=chart.scales.y;
+    if(!xScale||!yScale)return;
+    const x=xScale.getPixelForValue(currentTheta);
+    if(x<xScale.left||x>xScale.right)return;
+    const ctx=chart.ctx;
+    ctx.save();
+    ctx.fillStyle='rgba(212,163,115,0.15)';
+    ctx.fillRect(x-8,yScale.top,16,yScale.bottom-yScale.top);
+    ctx.strokeStyle='rgb(212,163,115)';
+    ctx.lineWidth=2.5;
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.moveTo(x,yScale.top);
+    ctx.lineTo(x,yScale.bottom);
+    ctx.stroke();
+    ctx.fillStyle='rgb(170,120,60)';
+    ctx.font="bold 10px 'DM Sans',sans-serif";
+    ctx.textAlign='center';
+    ctx.fillText('θ = '+currentTheta+'°',x,yScale.top+14);
+    ctx.restore();
+  }
+};
+
+// ── Chart 3: Force vs angle (θ) ──
+const chartAngle=new Chart(document.getElementById('chart-angle'),{
+  type:'scatter',
+  data:{datasets:[
+    {label:'Static (k = 1)',data:[],borderColor:CC.accent,backgroundColor:'transparent',borderWidth:2,fill:false,showLine:true,tension:0.3,pointRadius:0},
+    {label:'Dyno (k = 3)',data:[],borderColor:CC.warn,backgroundColor:'transparent',borderWidth:2,fill:false,showLine:true,tension:0.3,pointRadius:0}
+  ]},
+  plugins:[verticalLinePlugin],
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{position:'bottom',labels:{boxWidth:12}}},
+    scales:{
+      x:{type:'linear',min:15,max:80,
+        title:{display:true,text:'θ (degrees)',font:{size:9}},
+        ticks:{stepSize:10},
+        grid:{color:'rgba(0,0,0,0.04)'}},
+      y:{beginAtZero:true,
+        title:{display:true,text:'Force (kN)',font:{size:9}},
+        grid:{color:'rgba(0,0,0,0.04)'}}
+    }
+  }
+});
+
+// ── Chart 4: Force vs strap position (p) ──
+const chartP=new Chart(document.getElementById('chart-p'),{
+  type:'scatter',
+  data:{datasets:[
+    {label:'Static (k = 1)',data:[],borderColor:CC.accent,backgroundColor:'transparent',borderWidth:2,fill:false,showLine:true,tension:0.3,pointRadius:0},
+    {label:'Dyno (k = 3)',data:[],borderColor:CC.warn,backgroundColor:'transparent',borderWidth:2,fill:false,showLine:true,tension:0.3,pointRadius:0}
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{position:'bottom',labels:{boxWidth:12}}},
+    scales:{
+      x:{type:'linear',min:0.5,max:1.0,
+        title:{display:true,text:'Strap position p',font:{size:9}},
+        ticks:{stepSize:0.1, callback: v => v.toFixed(1)},
+        grid:{color:'rgba(0,0,0,0.04)'}},
+      y:{beginAtZero:true,
+        title:{display:true,text:'Force (kN)',font:{size:9}},
+        grid:{color:'rgba(0,0,0,0.04)'}}
+    }
+  }
+});
+
+function renderEqs(m,M,theta,p,phi){
+  if(typeof katex==='undefined')return;
+  katex.render(
+    String.raw`F \;=\; \frac{\left(m \,+\, \dfrac{M}{2}\right)\; g \;\cos\theta}{\; p \;\sin(\theta - \varphi)\;}`,
+    document.getElementById('eq-general'),
+    {throwOnError:false,displayMode:true}
+  );
+  katex.render(
+    String.raw`F \;=\; \frac{\left(${m} \,+\, \dfrac{${M}}{2}\right) \times 9.81 \times \cos ${theta}°}{\; ${p.toFixed(2)} \times \sin(${theta}° - ${phi}°)\;}`,
+    document.getElementById('eq-values'),
+    {throwOnError:false,displayMode:true}
+  );
+}
+
+function update(){
+  const{m,M,theta,p,phi,aR}=getP();
+  currentTheta=theta;
+  dsp.climber.textContent=m+' kg';dsp.board.textContent=M+' kg';dsp.angle.textContent=theta+'°';
+  dsp.p.textContent=p.toFixed(2);dsp.phi.textContent=phi+'°';dsp.anchor.textContent=aR+' kN';
+
+  const geomBad=(theta-phi)<=5;
+  document.getElementById('limit-warning').classList.toggle('visible',geomBad);
+  renderEqs(m,M,theta,p,phi);
+
+  const fS=calcF(m,M,theta,p,phi,1,1),fN=calcF(m,M,theta,p,phi,1.5,1),fP=calcF(m,M,theta,p,phi,2,1),fD=calcF(m,M,theta,p,phi,3,1);
+
+  if(fS===null||fD===null||geomBad){
+    ['kf-static','kf-per-anchor','kf-dyno','kf-sf'].forEach(id=>document.getElementById(id).textContent='—');
+    document.getElementById('kf-sf-sub').textContent='';
+    document.getElementById('eq-result').textContent='F = —';
+    const sb=document.getElementById('safety-indicator');sb.className='safety-bar danger';sb.querySelector('.safety-icon').textContent='✕';
+    document.getElementById('safety-text').textContent='Geometry invalid';
+    document.getElementById('safety-detail').textContent='θ − φ ≤ 5°. The straps cannot hold the board at this angle.';
+    chartScenarios.data.datasets[0].data=[0,0,0,0];chartScenarios.update('none');
+    chartAnchors.data.datasets[0].data=[0,0,0,0];chartAnchors.data.datasets[1].data=[aR,aR,aR,aR];chartAnchors.update('none');
+    drawAngleAndP(m,M,p,phi); // update both line charts with empty? but we call draw functions anyway
+    return;
+  }
+
+  const kN=v=>v/1000;
+  const sk=kN(fS),nk=kN(fN),pk=kN(fP),dk=kN(fD);
+
+  document.getElementById('kf-static').textContent=sk.toFixed(2)+' kN';
+  document.getElementById('kf-per-anchor').textContent=(sk/3).toFixed(2)+' kN';
+  document.getElementById('kf-dyno').textContent=(dk/3).toFixed(2)+' kN';
+  const sf=aR/(dk/3);
+  document.getElementById('kf-sf').textContent=sf.toFixed(1)+'×';
+  document.getElementById('kf-sf-sub').textContent=aR+' kN ÷ '+(dk/3).toFixed(2)+' kN';
+  document.getElementById('eq-result').textContent='F = '+sk.toFixed(2)+' kN';
+
+  const sb=document.getElementById('safety-indicator');
+  const bo=calcF(0,M,theta,p,phi,1,1);const bok=bo!==null?(bo/1000).toFixed(1):'?';
+  if(sf>=2.5){sb.className='safety-bar safe';sb.querySelector('.safety-icon').textContent='✓';document.getElementById('safety-text').textContent='System adequate for bouldering and dynos';document.getElementById('safety-detail').textContent='Safety factor '+sf.toFixed(1)+'× on worst dynamic scenario. Board alone demands '+bok+' kN.';}
+  else if(sf>=1.5){sb.className='safety-bar caution';sb.querySelector('.safety-icon').textContent='⚠';document.getElementById('safety-text').textContent='Margins reduced. Caution advised.';document.getElementById('safety-detail').textContent='Safety factor '+sf.toFixed(1)+'×. Consider stronger anchors or reducing loads.';}
+  else{sb.className='safety-bar danger';sb.querySelector('.safety-icon').textContent='✕';document.getElementById('safety-text').textContent='Inadequate. Do not use without upgrades.';document.getElementById('safety-detail').textContent='Safety factor '+sf.toFixed(1)+'× is too low.';}
+
+  chartScenarios.data.datasets[0].data=[sk,nk,pk,dk];chartScenarios.update('none');
+  const pa=[sk/3,nk/3,pk/3,dk/3];
+  chartAnchors.data.datasets[0].data=pa;chartAnchors.data.datasets[1].data=[aR,aR,aR,aR];
+  chartAnchors.data.datasets[0].backgroundColor=pa.map(v=>v>aR?CC.warnA(0.7):CC.accentA(0.6));
+  chartAnchors.data.datasets[0].borderColor=pa.map(v=>v>aR?CC.warn:CC.accent);
+  chartAnchors.update('none');
+  drawAngleAndP(m,M,p,phi);
+}
+
+function drawAngleAndP(m,M,p,phi){
+  // Update angle chart (θ from 20 to 80, but respect theta-phi>5)
+  const dAngleStatic=[],dAngleDyno=[];
+  const minTheta=Math.max(phi+6,20);
+  for(let th=minTheta;th<=80;th++){
+    const fs=calcF(m,M,th,p,phi,1,1),fd=calcF(m,M,th,p,phi,3,1);
+    if(fs===null||fd===null)continue;
+    dAngleStatic.push({x:th,y:fs/1000});
+    dAngleDyno.push({x:th,y:fd/1000});
+  }
+  chartAngle.data.datasets[0].data=dAngleStatic;
+  chartAngle.data.datasets[1].data=dAngleDyno;
+  chartAngle.options.scales.x.min=minTheta;
+  chartAngle.options.scales.x.max=80;
+  chartAngle.update('none');
+
+  // Update p chart (p from 0.5 to 1.0, fixed current θ, φ)
+  const dPStatic=[],dPDyno=[];
+  for(let px=0.5; px<=1.0; px+=0.01){
+    const fs=calcF(m,M,theta=currentTheta,px,phi,1,1);
+    const fd=calcF(m,M,currentTheta,px,phi,3,1);
+    if(fs===null||fd===null)continue;
+    dPStatic.push({x:px,y:fs/1000});
+    dPDyno.push({x:px,y:fd/1000});
+  }
+  chartP.data.datasets[0].data=dPStatic;
+  chartP.data.datasets[1].data=dPDyno;
+  chartP.options.scales.x.min=0.5;
+  chartP.options.scales.x.max=1.0;
+  chartP.update('none');
+}
+
+Object.values(sl).forEach(s=>s.addEventListener('input',update));
+function init(){if(typeof katex!=='undefined')update();else setTimeout(init,80);}
+init();
 </script>
 </body>
 </html>
