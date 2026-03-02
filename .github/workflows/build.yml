@@ -49,16 +49,14 @@ jobs:
                 border-radius: 5px; text-decoration: none; font-size: 0.9rem;
               }
               .header a:hover { background: #2980b9; }
+              
               iframe {
-                width: 100%; height: calc(100vh - 60px); border: none;
-              }
+  width: 100%; height: 100vh; border: none;
+}
             </style>
           </head>
           <body>
-            <div class="header">
-              <h1>Wall Analysis</h1>
-              <a href="main.pdf" download>Download PDF</a>
-            </div>
+            
             <iframe src="main.pdf"></iframe>
           </body>
           </html>
