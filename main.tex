@@ -13,7 +13,15 @@
 \usepackage{xcolor}
 \usepackage{float}
 \usepackage{microtype}
+\usepackage{tabularx}
+\usepackage{colortbl}
+\usepackage{xcolor}
+\usepackage{pifont} % for \ding symbols
+\usepackage{enumitem}
 
+\usepackage[T1]{fontenc}
+\usepackage{mathpazo}
+\linespread{1.05}
 % Colors
 \definecolor{secblue}{HTML}{2B4A6F}
 \definecolor{lightgray}{HTML}{F2F2F2}
@@ -60,6 +68,14 @@ Only one climber uses the wall at a time. The climber boulders up and down the b
     \label{fig:wall}
 \end{figure}
 
+% =====================================================
+% SUMMARY
+% =====================================================
+\newpage
+\section*{Disclaimer}
+\addcontentsline{toc}{section}{Summary}
+
+This document is an engineering estimate, not a formal structural certification. It uses simplified static models with dynamic multipliers, assumes equal load sharing across the three straps, and relies on estimated (not tested) material properties. The limitations are listed in full in Section~\ref{sec:limitations}.
 
 \newpage
 \tableofcontents
@@ -79,7 +95,7 @@ The boundary wall is 226~cm tall, solid concrete block with rebar tying it into 
 \midrule
 Board length $L$ & 366 cm \\
 Board width & 20 cm \\
-Board mass $M$ & 500 kg (weighed) \\
+Board mass $M$ & 500 kg (estimated by Zac, with max 800kg) \\
 Base offset from wall & 54 cm \\
 Pivot block & 20 cm wide, 32 cm tall \\
 Angle from vertical $\delta$ & 40\textdegree \\
@@ -194,9 +210,10 @@ Both corrections above are formalised in the generalised model of Section~\ref{s
 \section{Fall Impact on the Board}
 \label{sec:fall_impact}
 
+During climbing, the forces on the board exceed the climber's static body weight. There are two main reasons:
+
 \begin{itemize}
     \item The climber pushes off the board as they fall (Newton's third law: the board gets a kick).
-    \item They might grab a hold or the strap on the way down, briefly yanking the board.
     \item Dynamic climbing moves (dynos, cutting feet) produce force spikes even during normal use.
 \end{itemize}
 
@@ -440,10 +457,14 @@ If all three straps sit in the same vertical plane, they resist none of this lat
 The base currently rests on the ground with nothing fixing it in place. With the board weighing 500~kg the friction force is substantial ($\sim$3.3~kN at $\mu = 0.5$), but an aggressive lateral move could still overcome it. Pinning or bolting the base to a ground plate would eliminate this failure mode entirely.
 
 % =====================================================
-\section{Dynamic Impact Loading}
+\section{Dynamic Impact Loading (Theoretical Upper Bound)}
 \label{sec:impact}
 
-Smooth climbing isn't the worst case. The real problem is sudden events: the climber grabs the board edge mid-fall, or lands partially on it. Both scenarios below use energy conservation to estimate the peak force.
+This section estimates the forces that would result from a climber catching themselves on the board mid-fall. It is included as a conservative theoretical bound for engineering completeness.
+
+\textbf{How realistic is this scenario?} At the current 50\textdegree{} setting, a falling climber peels away from the board surface and drops onto the mat below. The holds face away from the direction of the fall, so there is nothing to grab on the way down. Experienced boulderers let go cleanly and do not attempt to arrest falls. Bouldering falls are also short: the climber is typically 1--2~m off the ground.
+
+The scenario becomes more relevant at steeper board angles (closer to vertical), where falls happen along the surface rather than away from it. Since the wall's angle is adjustable, the analysis is included to cover the full range of possible settings.
 
 \subsection{Sudden Load}
 
@@ -504,19 +525,9 @@ With a more realistic $x = 0.05$~m:
 F_{\text{impact}} \approx \frac{100 \times 3.13^2}{2 \times 0.05} + 100 \times 9.81 \approx 10.8\;\text{kN}
 \]
 
-\begin{tcolorbox}[colback=warnred!5!white,colframe=warnred!70!black,boxrule=0.5pt,arc=1pt]
-Impact loading is the primary risk. A climber catching themselves on the board mid-fall can generate forces well beyond what the static design accounts for. The exact magnitude depends heavily on the system stiffness, but even with generous compliance assumptions the forces are severe.
+\begin{tcolorbox}[colback=lightgray,colframe=rulecolor,boxrule=0.5pt,arc=1pt]
+This impact model assumes a full arrest: both hands gripping the board, entire body decelerating through the straps. At the current 50\textdegree{} angle this does not describe a realistic bouldering fall: the climber falls away from the surface, not along it. At steeper angles (near-vertical), mid-fall catches become more plausible and these forces should be taken seriously. The model is included to bound the theoretical worst case across all board angles.
 \end{tcolorbox}
-
-\vspace{0.5em}
-Figure~\ref{fig:impact_sensitivity} shows how the peak impact force varies with stopping distance for three fall heights. Even a modest increase in compliance (from 2~cm to 5~cm) cuts the force by more than half.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.75\linewidth]{impact_sensitivity.png}
-    \caption{Impact force as a function of stopping distance $x$ for a 100~kg climber. The two reference points from the worked examples above are marked. Horizontal lines show the static load and recommended anchor rating for comparison.}
-    \label{fig:impact_sensitivity}
-\end{figure}
 
 % =====================================================
 \section{Combined Results}
@@ -527,7 +538,7 @@ These are the resulting strap reaction forces, obtained by
 feeding the multipliers from Section~\ref{sec:fall_impact} into the generalised
 moment balance of Section~\ref{sec:generalised}. Values are evaluated with the
 site-specific geometry: $p = 0.75$, $\phi = 10°$, $\delta = 40°$.
-Climber mass $m = 100$~kg, board mass $M = 500$~kg (weighed).
+Climber mass $m = 100$~kg, board mass $M = 500$~kg
 
 \begin{center}
 \begin{tabular}{@{}lll@{}}
@@ -539,25 +550,21 @@ Static $\times$ 3 safety factor & 13.73 kN & 4.58 kN \\
 Normal climbing ($k=1.5$) & 5.23 kN & 1.74 kN \\
 Push-off during fall ($k=2$) & 5.89 kN & 1.96 kN \\
 Dynamic move / dyno ($k=3$) & 7.19 kN & 2.40 kN \\
-Impact catch ($x=0.05$ m) & $\sim$17.7 kN & $\sim$5.9 kN \\
-Impact catch ($x=0.02$ m) & $\sim$37.3 kN & $\sim$12.4 kN \\
+\midrule
+\textit{Impact catch} ($x=0.05$ m)\textsuperscript{$\dagger$} & $\sim$17.7 kN & $\sim$5.9 kN \\
+\textit{Impact catch} ($x=0.02$ m)\textsuperscript{$\dagger$} & $\sim$37.3 kN & $\sim$12.4 kN \\
 \bottomrule
 \end{tabular}
 \end{center}
 \vspace{0.3em}
+{\small \textsuperscript{$\dagger$}Theoretical upper bound. See Section~\ref{sec:impact} for why this does not describe a realistic fall at the current 50\textdegree{} angle.}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.85\linewidth]{force_bar_chart.png}
-    \caption{Strap forces by scenario. The jump from routine climbing (blue) to impact catches (red) is an order of magnitude.}
-    \label{fig:force_bars}
-\end{figure}
 
 These forces are roughly 60\% higher than the simplified model of Section~\ref{sec:simplified} (which assumed $p = 1$ and $\phi = 0$). The difference comes from the strap attaching at 75\% of the board length rather than the very top, giving the strap a shorter lever arm, and from the strap pulling slightly below horizontal.
 
-Even unloaded, the board alone demands $\sim$3.27~kN from the straps. The $3\times$ safety factor on the static load (4.58~kN per anchor) still exceeds the worst dynamic climbing scenario ($k = 3$, 2.40~kN per anchor). The real concern remains impact catches, which produce forces an order of magnitude above normal climbing.
+Even unloaded, the board alone demands $\sim$3.27~kN from the straps. The $3\times$ safety factor on the static load (4.58~kN per anchor) still exceeds the worst realistic dynamic climbing scenario ($k = 3$, 2.40~kN per anchor). The system handles normal bouldering with comfortable margin.
 
-The per-anchor values assume equal load sharing across all three straps. In practice, tensioning three separate ratchet straps identically is almost impossible. Under a sudden impact, the stiffest strap will attract the majority of the force before the others stretch enough to engage. In a worst case, a single anchor could briefly see close to the full impact force rather than a third of it.
+The per-anchor values assume equal load sharing across all three straps. In practice, tensioning three separate ratchet straps identically is almost impossible. Under a sudden load, the stiffest strap will attract the majority of the force before the others stretch enough to engage. In a worst case, a single anchor could briefly see close to the full load rather than a third of it.
 
 % =====================================================
 \section{Board Bending \& Internal Force Analysis}
@@ -569,12 +576,6 @@ Everything up to this point asks: \textit{will the straps and anchors hold?} Thi
 
 The board is held up at two points: the pivot at the bottom (where it rests on the ground block) and the strap attachment partway up (where the ratchet straps connect, at 75\% of the board's length). Between those two supports, and especially above the strap attachment, the board is carrying load like a beam, and beams can bend, crack, or snap if the forces are too high.
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.92\linewidth]{critical_points.png}
-    \caption{The board as a beam. It's supported at the pivot (bottom) and the strap attachment (75\% up). The section above the straps is an unsupported overhang, like a diving board.}
-    \label{fig:critical_points}
-\end{figure}
 
 \subsection{Two Things Are Pushing on the Board}
 
@@ -740,14 +741,6 @@ Dyno ($k=3$)             & 2{,}089 N$\cdot$m & 5.1 cm & 6.4 cm \\
 \label{tab:section_props}
 \end{table}
 
-\subsection{Recommendations}
-
-\begin{itemize}
-    \item \textbf{Inspect the strap attachment area} for cracking, deformation, or fastener pull-through. This is the highest-risk location on the board.
-    \item \textbf{Measure the board's depth} at the strap point and mid-span. Compare against Table~\ref{tab:section_props}. A 20~cm $\times$ 5~cm solid timber section passes the static check; plywood needs to be verified against the lower allowable stress.
-    \item \textbf{Check for joints} (plywood butt joints, framing splices) in the 80--180~cm zone, which coincides with peak sagging moment.
-\end{itemize}
-
 % =====================================================
 \section{The Anchor Problem}
 \label{sec:anchor_problem}
@@ -782,7 +775,7 @@ M_{\text{OT}} = F \times h_{\text{bolt}}
 
 where $h_{\text{bolt}} = 2.00$~m is how high the bolts sit above the base of the wall. The restoring moment comes from the wall's self-weight acting at its half-thickness ($M_{\text{restore}} \approx W_{\text{wall}} \cdot t/2$, where $t$ is the wall thickness) plus whatever tension the rebar can develop at the footing. Without the wall thickness confirmed, we cannot compute this precisely, but for a typical 200~mm solid block wall at 2.26~m tall, the self-weight restoring moment is roughly 5--7~kN$\cdot$m per metre of wall length; the rebar adds significantly more.
 
-For normal climbing loads (total strap force $\sim$4.6--7.2~kN), the overturning moment is 9--14~kN$\cdot$m. The wall's self-weight and rebar anchorage should handle this, but the margin is tighter than it was with the lighter board estimate. Under impact loading (17.7--37.3~kN), the overturning moment reaches 35--75~kN$\cdot$m, which is a very serious demand.
+For normal climbing loads (total strap force $\sim$4.6--7.2~kN), the overturning moment is 9--14~kN$\cdot$m. The wall's self-weight and rebar anchorage should handle this comfortably. Under the theoretical impact scenario (17.7--37.3~kN), the overturning moment would reach 35--75~kN$\cdot$m, but as discussed in Section~\ref{sec:impact}, this does not describe a realistic fall at the current angle.
 
 The nearest corner is 380~cm to the right and 494~cm to the left. At these distances the anchors are effectively mid-span on a long run of wall, so the corners offer limited stiffening benefit.
 
@@ -793,23 +786,70 @@ Recommended minimum anchor rating:
 \boxed{8\,\text{kN}}
 \]
 
-This gives margin above the $3\times$ static safety factor (4.58~kN per anchor) and covers all dynamic climbing scenarios, but it will not save you from a hard impact catch.
+This gives margin above the $3\times$ static safety factor (4.58~kN per anchor) and covers all realistic dynamic climbing scenarios.
 
 % =====================================================
 \section{Final Risk Estimation}
 \label{sec:risk}
+% =====================================================
+% FINAL VERDICT (drop-in)
+% =====================================================
 
-The $3\times$ static safety factor seems to cover everyday climbing, weight shifts, and moderate dynamic moves. The system seems adequate for routine bouldering as long as the anchors hold and the wall can take the lateral load.
+\subsection*{Final Verdict}
 
-Even unloaded, the board demands 3.27~kN from the straps, leaving less reserve for dynamic events. The solid concrete wall with rebar into a footing is reassuring and provides real resistance to overturning under normal climbing loads.
+\rowcolors{2}{lightgray}{white}
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}l c c X@{}}
+\toprule
+\textbf{Scenario} & \textbf{Board Mass} & \textbf{Status} & \textbf{Notes} \\
+\midrule
+Normal climbing & 500 kg & \ding{51}\;Adequate &
+With anchors rated $\geq 8\,\text{kN}$ each, static and typical dynamic loads are within estimated capacity. \\
+Dynos ($k \approx 3$) & 500 kg & \ding{51}\;Adequate &
+Peak estimated demand $\approx 2.40\,\text{kN}$ per anchor (equal sharing), well below the $8\,\text{kN}$ target. \\
+Normal climbing & 800 kg & \textbf{\color{warnred}{\ding{115}}}\;Caution &
+Static demand rises to $\approx 2.18\,\text{kN}$ per anchor; reserve is reduced and sensitivity to unequal sharing increases. \\
+Dynos ($k \approx 3$) & 800 kg & \textbf{\color{warnred}{\ding{115}}}\;Caution &
+Bending check indicates $\sim 5.4\,\text{cm}$ required depth vs $5.0\,\text{cm}$ nominal; verify board section and construction. \\
+Impact catch / fall arrest & Any & \textbf{\color{warnred}{\ding{55}}}\;Avoid &
+Theoretical forces ($\sim 17$--$39\,\text{kN}$) can exceed typical domestic anchor capacity. Unlikely at 50\textdegree{}, but reassess if angle is steepened. \\
+Long-term fatigue / cracking & Any & \textbf{\color{warnred}{\ding{115}}}\;Caution &
+Existing cracks around anchors may propagate with repeated cycling; monitor and upgrade hardware. \\
+Unequal strap loading & Any & \textbf{\color{warnred}{\ding{115}}}\;Caution &
+One anchor may briefly see far more than one-third of the total; do not rely on per-anchor averages alone. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\rowcolors{2}{}{} % reset
 
-The remaining concerns are: impact catches (which produce forces that would challenge any domestic wall), visible cracking around the anchors, general-purpose hardware, and long-term UV/thermal degradation.
+\subsection*{Key takeaways}
+
+\begin{itemize}
+    \item At 500 kg, the system handles routine bouldering and dynos with comfortable margin, provided anchors are rated $\geq 8\,\text{kN}$ and inspection is routine.
+    \item At 800 kg, the board section may become the limiting factor for dynos and anchor margins tighten; verify board depth and treat anchors conservatively.
+    \item Impact catches are not representative of normal use at 50\textdegree{}, but consequences are high if one occurs; reassess if the board angle changes significantly.
+    \item The dominant practical risks are unequal strap loading and long-term fatigue  monitoring and hardware upgrades matter more than refining the static numbers.
+\end{itemize}
+
+\textbf{The practical risks are long-term and cumulative:}
+
+\begin{itemize}
+    \item \textbf{Anchor fatigue.} The wall already shows visible cracks around the anchors (Figure~\ref{fig:cracks}). Thousands of load cycles from regular bouldering sessions progressively loosen masonry anchors and propagate cracks, even at forces well below single-event capacity. Regular inspection of the anchors and surrounding masonry is essential.
+
+    \item \textbf{UV and thermal degradation.} Outdoor-exposed polyester straps can lose $\sim$30\% of their strength in the first 12 months. UAE heat and thermal cycling also gradually loosen anchors in the block. Straps should be inspected and replaced at least annually.
+
+    \item \textbf{Unequal strap loading.} The three straps are different lengths (234~cm vs 227~cm) and are tensioned by hand with ratchet mechanisms. Under load, the tightest strap attracts the majority of the force. A single anchor could see significantly more than a third of the total.
+
+    \item \textbf{General-purpose hardware.} The eye bolts are not rated for life safety. Upgrading to rated hardware with load distribution plates (Section~\ref{sec:load_plates}) would significantly improve reliability.
+\end{itemize}
+
+Even unloaded, the board demands 3.27~kN from the straps, which leaves less reserve for dynamic events than a lighter board would. This makes the long-term concerns above more important: if anchor capacity degrades over time, the margin shrinks.
 
 % =====================================================
 \section{Improvements Ideation}
 \label{sec:improvements}
 
-Six modifications are suggested below to address the anchor, bending, and impact concerns identified above. They are ranked roughly by structural impact, with the most effective options first.
+Six modifications are suggested below to address the anchor, bending, and fatigue concerns identified above. They are ranked roughly by structural impact, with the most effective options first.
 
 \subsection{A: Vertical Wire Rope with Diagonal Strut (Rank 1)}
 \label{sec:wire_rope}
@@ -910,7 +950,7 @@ This document is an engineering estimate, not a formal structural certification.
 
     \item \textbf{No fatigue or cyclic analysis.} Thousands of load cycles from regular bouldering sessions can progressively loosen masonry anchors and propagate cracks well below single-event capacities. The existing crack pattern (Figure~\ref{fig:cracks}) may already be evidence of this.
 
-    \item \textbf{Equal load sharing assumed.} All per-anchor forces assume the three straps share load equally. In practice the tightest strap attracts the majority of the force, especially under impact; a single anchor could briefly see close to the full load.
+    \item \textbf{Equal load sharing assumed.} All per-anchor forces assume the three straps share load equally. In practice the tightest strap attracts the majority of the force, especially under sudden loading; a single anchor could briefly see close to the full load.
 
     \item \textbf{No progressive failure analysis.} If one strap or anchor fails, the remaining two inherit the full load instantaneously. Cascade failure is not assessed.
 
@@ -918,7 +958,7 @@ This document is an engineering estimate, not a formal structural certification.
 
     \item \textbf{Material properties estimated, not tested.} Wood species, grade, moisture content, and masonry strength are assumed from typical values. The allowable stresses in Section~\ref{sec:bending} should be verified against actual materials.
 
-    \item \textbf{Impact forces highly sensitive to assumed stiffness.} The stopping distance $x$ during an impact catch depends on strap elongation, board deflection, and grip compliance, none of which were measured. See Figure~\ref{fig:impact_sensitivity} for the sensitivity.
+    \item \textbf{Impact model assumes full arrest.} The impact analysis (Section~\ref{sec:impact}) models a climber falling and being brought to a complete stop by the board. At the current 50\textdegree{} angle this does not describe a realistic bouldering fall: the incline pushes the climber away from the surface, holds face away from the direction of the fall, and experienced boulderers drop cleanly onto the mat. The model is included as a conservative upper bound for steep-angle use and for engineering completeness. 
 
     \item \textbf{Environmental degradation noted but not quantified.} UV exposure, thermal cycling, and sustained-load creep on the straps and anchors are not projected over the expected service life.
 
@@ -946,11 +986,11 @@ The strap attachment fraction $p = 0.75$ and strap angle $\phi = 10°$ were deri
 \vspace{12pt}
 
 \noindent\textbf{4. Board mass.} \\[4pt]
-The board mass is confirmed at 500~kg minimum. At 500~kg the board's self-weight dominates the static loading: even with no climber on it, the board alone generates a total strap force of approximately 3.27~kN. All forces throughout this document use $M = 500$~kg.
+The board mass is estd at 500~kg minimum. At 500~kg the board's self-weight dominates the static loading: even with no climber on it, the board alone generates a total strap force of approximately 3.27~kN. All forces throughout this document use $M = 500$~kg.
 
 \vspace{12pt}
 
-\noindent\textbf{5. Straps assumed to take load equally throughout calculations.} In practice the tightest strap attracts the most load, especially under impact. See Section~\ref{sec:combined} discussion.
+\noindent\textbf{5. Straps assumed to take load equally throughout calculations.} In practice the tightest strap attracts the most load, especially under sudden loading. See Section~\ref{sec:combined} discussion.
 
 \vspace{12pt}
 
