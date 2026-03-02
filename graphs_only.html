@@ -72,7 +72,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);line
 .chart-card.standalone{margin-top:0.8rem;}
 .chart-card h3{font-family:'DM Serif Display',serif;font-size:0.95rem;font-weight:400;color:var(--accent);margin-bottom:0.1rem;}
 .chart-desc{font-size:0.72rem;color:var(--subtle);margin-bottom:0.5rem;line-height:1.45;}
-.chart-wrap{position:relative;height:180px;} /* slightly shorter to fit two in a row */
+.chart-wrap{position:relative;height:180px;}
 
 .limit-warning{background:#fdf6ec;border:1px solid #e0c98d;color:#8a6914;border-radius:6px;padding:0.6rem 0.9rem;font-size:0.78rem;margin:0.6rem 0;display:none;}
 .limit-warning.visible{display:block;}
@@ -82,7 +82,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);line
   .controls-grid{grid-template-columns:1fr 1fr;gap:0.6rem 0.8rem;}
   .key-figures{grid-template-columns:1fr 1fr;gap:0.5rem;}
   .chart-row{grid-template-columns:1fr;}
-  .chart-wrap{height:180px;}.chart-wrap.wide{height:170px;}
+  .chart-wrap{height:180px;}
   .figure-card{padding:0.6rem 0.7rem;}.fig-value{font-size:1.1rem;}
   .equation-box{padding:0.8rem 0.9rem;}.eq-result{font-size:1.05rem;}
   .chart-card{padding:0.8rem 0.7rem 0.5rem;}
@@ -91,7 +91,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);line
   .controls-grid{grid-template-columns:1fr;gap:0.5rem;}
   .controls-bar{padding:0.7rem 0.8rem;}
   .control-group .vd{font-size:0.85rem;}
-  .chart-wrap{height:160px;}.chart-wrap.wide{height:150px;}
+  .chart-wrap{height:160px;}
 }
 </style>
 </head>
@@ -197,7 +197,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);line
     <div class="info-note"><span class="icon">📄</span> Impact catches (Section 7 of the PDF) can reach 18–37 kN total, but are unlikely at typical angles.</div>
   </div>
 
-  <!-- Bar charts row (unchanged) -->
+  <!-- Bar charts row -->
   <div class="chart-row">
     <div class="chart-card">
       <h3>Strap Force by Scenario</h3>
@@ -211,7 +211,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);line
     </div>
   </div>
 
-  <!-- New row: two line charts (force vs θ, force vs p) -->
+  <!-- Two line charts: force vs θ, force vs p -->
   <div class="chart-row">
     <div class="chart-card">
       <h3>Force vs Board Angle (θ)</h3>
@@ -260,7 +260,7 @@ Chart.defaults.plugins.legend.labels.font={size:10};
 
 const CC={accent:'rgb(22,66,91)',accentA:a=>`rgba(22,66,91,${a})`,sand:'rgb(212,163,115)',sandA:a=>`rgba(212,163,115,${a})`,warn:'rgb(155,34,38)',warnA:a=>`rgba(155,34,38,${a})`};
 
-// ── Chart 1: Scenarios (bar) ──────────
+// Chart 1: Scenarios (bar)
 const chartScenarios=new Chart(document.getElementById('chart-scenarios'),{
   type:'bar',
   data:{labels:['Static\nk = 1','Normal\nk = 1.5','Push off\nk = 2','Dyno\nk = 3'],
@@ -268,7 +268,7 @@ const chartScenarios=new Chart(document.getElementById('chart-scenarios'),{
   options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,title:{display:true,text:'Force (kN)',font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{grid:{display:false}}}}
 });
 
-// ── Chart 2: Per anchor (bar + line) ──
+// Chart 2: Per anchor (bar + line)
 const chartAnchors=new Chart(document.getElementById('chart-anchors'),{
   type:'bar',
   data:{labels:['Static\nk = 1','Normal\nk = 1.5','Push off\nk = 2','Dyno\nk = 3'],
@@ -279,11 +279,11 @@ const chartAnchors=new Chart(document.getElementById('chart-anchors'),{
   options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,title:{display:true,text:'Force (kN)',font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{grid:{display:false}}}}
 });
 
-// ── Plugin: vertical line at current θ (for angle chart) ──
+// Plugin: vertical line at current θ (for angle chart)
 const verticalLinePlugin={
   id:'verticalLine',
   afterDatasetsDraw(chart){
-    if(chart.canvas.id !== 'chart-angle') return; // only on angle chart
+    if(chart.canvas.id !== 'chart-angle') return;
     const xScale=chart.scales.x;
     const yScale=chart.scales.y;
     if(!xScale||!yScale)return;
@@ -308,7 +308,7 @@ const verticalLinePlugin={
   }
 };
 
-// ── Chart 3: Force vs angle (θ) ──
+// Chart 3: Force vs angle (θ)
 const chartAngle=new Chart(document.getElementById('chart-angle'),{
   type:'scatter',
   data:{datasets:[
@@ -330,7 +330,7 @@ const chartAngle=new Chart(document.getElementById('chart-angle'),{
   }
 });
 
-// ── Chart 4: Force vs strap position (p) ──
+// Chart 4: Force vs strap position (p)
 const chartP=new Chart(document.getElementById('chart-p'),{
   type:'scatter',
   data:{datasets:[
@@ -386,7 +386,7 @@ function update(){
     document.getElementById('safety-detail').textContent='θ − φ ≤ 5°. The straps cannot hold the board at this angle.';
     chartScenarios.data.datasets[0].data=[0,0,0,0];chartScenarios.update('none');
     chartAnchors.data.datasets[0].data=[0,0,0,0];chartAnchors.data.datasets[1].data=[aR,aR,aR,aR];chartAnchors.update('none');
-    drawAngleAndP(m,M,p,phi); // update both line charts with empty? but we call draw functions anyway
+    drawAngleAndP(m,M,p,phi);
     return;
   }
 
@@ -435,7 +435,7 @@ function drawAngleAndP(m,M,p,phi){
   // Update p chart (p from 0.5 to 1.0, fixed current θ, φ)
   const dPStatic=[],dPDyno=[];
   for(let px=0.5; px<=1.0; px+=0.01){
-    const fs=calcF(m,M,theta=currentTheta,px,phi,1,1);
+    const fs=calcF(m,M,currentTheta,px,phi,1,1);
     const fd=calcF(m,M,currentTheta,px,phi,3,1);
     if(fs===null||fd===null)continue;
     dPStatic.push({x:px,y:fs/1000});
