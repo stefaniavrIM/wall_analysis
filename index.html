@@ -120,6 +120,10 @@
       background: white;
     }
 
+    .dl-btn.mobile-hide {
+      display: none;
+    }
+
     /* ── Content panels ── */
     .panel-wrap {
       height: calc(100vh - var(--tab-h));
@@ -251,7 +255,7 @@
       <div class="pdf-fallback">
         <div class="icon-big">📄</div>
         <h2>Full Report</h2>
-        <p>PDF viewer isn't available on this device. Tap below to download and open in your reader.</p>
+        <p>Download the PDF to read the full analysis.</p>
         <a href="main.pdf" download="Zac_Climbing_Wall_Report.pdf" class="dl-link">Download PDF</a>
       </div>
     </div>
@@ -274,13 +278,20 @@
       if (e.key === '2') switchTab('charts');
     });
 
-    // Only show inline PDF on desktop — mobile can't render it
-    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || 'ontouchstart' in window;
-    if (!isMobile) {
+    // Detect browsers that cannot render PDFs inline
+    const ua = navigator.userAgent;
+    const isAndroid = /Android/i.test(ua);
+    const isChromeIOS = /CriOS/i.test(ua);
+    const isSamsungBrowser = /SamsungBrowser/i.test(ua);
+    const cannotEmbedPDF = isAndroid || isChromeIOS || isSamsungBrowser;
+
+    if (!cannotEmbedPDF) {
       const embed = document.querySelector('.pdf-embed');
       embed.src = embed.dataset.src;
       embed.classList.add('show');
       document.querySelector('.pdf-fallback').classList.add('hide');
+    } else {
+      document.querySelector('.dl-btn').classList.add('mobile-hide');
     }
   </script>
 
