@@ -13,7 +13,7 @@
       --rule: #C9BFA8;
       --subtle: #6B7280;
       --bg: #fdfcf9;
-      --tab-h: 52px;
+      --tab-h: 38px;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -41,10 +41,10 @@
     .topbar-title {
       font-family: 'DM Serif Display', serif;
       color: var(--cream);
-      font-size: 1.05rem;
+      font-size: 0.88rem;
       font-weight: 400;
       white-space: nowrap;
-      margin-right: 1.5rem;
+      margin-right: 1.2rem;
       opacity: 0.9;
     }
 
@@ -56,16 +56,16 @@
     }
 
     .tab {
-      padding: 0.5rem 1.2rem;
+      padding: 0.35rem 1rem;
       font-family: 'DM Sans', sans-serif;
-      font-size: 0.8rem;
+      font-size: 0.72rem;
       font-weight: 600;
       letter-spacing: 0.03em;
       color: rgba(255,255,255,0.55);
       background: transparent;
       border: none;
       cursor: pointer;
-      border-radius: 6px 6px 0 0;
+      border-radius: 5px 5px 0 0;
       transition: all 0.2s;
       position: relative;
       bottom: 0;
@@ -102,14 +102,14 @@
     }
 
     .dl-btn {
-      padding: 0.3rem 0.7rem;
+      padding: 0.2rem 0.55rem;
       font-family: 'DM Sans', sans-serif;
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       font-weight: 600;
       color: var(--accent);
       background: var(--cream);
       border: none;
-      border-radius: 4px;
+      border-radius: 3px;
       cursor: pointer;
       text-decoration: none;
       transition: all 0.15s;
@@ -188,25 +188,25 @@
 
     /* ── Mobile ── */
     @media (max-width: 640px) {
-      :root { --tab-h: 46px; }
+      :root { --tab-h: 36px; }
 
       .topbar { padding: 0 0.6rem; }
 
       .topbar-title {
-        font-size: 0.9rem;
-        margin-right: 0.8rem;
+        font-size: 0.78rem;
+        margin-right: 0.6rem;
       }
 
       .tab {
-        padding: 0.4rem 0.8rem;
-        font-size: 0.72rem;
+        padding: 0.3rem 0.7rem;
+        font-size: 0.68rem;
       }
 
       .disclaimer { display: none; }
 
       .dl-btn {
-        font-size: 0.65rem;
-        padding: 0.25rem 0.5rem;
+        font-size: 0.6rem;
+        padding: 0.2rem 0.45rem;
       }
 
       /* Show fallback on mobile, hide embed */
@@ -215,8 +215,8 @@
     }
 
     @media (max-width: 380px) {
-      .topbar-title { font-size: 0.8rem; margin-right: 0.5rem; }
-      .tab { padding: 0.35rem 0.6rem; font-size: 0.68rem; }
+      .topbar-title { font-size: 0.72rem; margin-right: 0.4rem; }
+      .tab { padding: 0.25rem 0.5rem; font-size: 0.64rem; }
       .tab-icon { display: none; }
     }
   </style>
@@ -242,9 +242,9 @@
   <div class="panel-wrap">
     <!-- Report panel -->
     <div class="panel active" id="panel-report">
-      <embed src="main.pdf" type="application/pdf" class="pdf-embed">
+      <embed src="main.pdf#toolbar=0&navpanes=0&view=FitH" type="application/pdf" class="pdf-embed">
       <div class="pdf-fallback">
-        <div class="icon-big">📄</div>
+        
         <h2>Full Report</h2>
         <p>PDF viewer isn't available on this device. Tap below to download and open in your reader.</p>
         <a href="main.pdf" download="Zac_Climbing_Wall_Report.pdf" class="dl-link">Download PDF</a>
