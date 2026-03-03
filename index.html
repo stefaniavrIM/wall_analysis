@@ -26,7 +26,6 @@
       color: var(--ink);
     }
 
-    /* ── Top bar ── */
     .topbar {
       height: var(--tab-h);
       background: var(--accent);
@@ -120,11 +119,6 @@
       background: white;
     }
 
-    .dl-btn.mobile-hide {
-      display: none;
-    }
-
-    /* ── Content panels ── */
     .panel-wrap {
       height: calc(100vh - var(--tab-h));
       position: relative;
@@ -140,87 +134,19 @@
       display: block;
     }
 
-    /* ── PDF: default to fallback, JS upgrades on desktop ── */
-    .pdf-fallback {
-      display: flex;
-      height: 100%;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem;
-      text-align: center;
-      background: var(--bg);
-    }
-
     .pdf-embed {
-      display: none;
       width: 100%;
       height: 100%;
       border: none;
     }
 
-    .pdf-embed.show {
-      display: block;
-    }
-
-    .pdf-fallback.hide {
-      display: none;
-    }
-
-    .pdf-fallback .icon-big { font-size: 3rem; margin-bottom: 1rem; }
-
-    .pdf-fallback h2 {
-      font-family: 'DM Serif Display', serif;
-      font-weight: 400;
-      font-size: 1.3rem;
-      color: var(--accent);
-      margin-bottom: 0.3rem;
-    }
-
-    .pdf-fallback p {
-      font-size: 0.85rem;
-      color: var(--subtle);
-      margin-bottom: 1.5rem;
-      max-width: 280px;
-      line-height: 1.5;
-    }
-
-    .pdf-fallback .dl-link {
-      display: inline-block;
-      padding: 0.8rem 2rem;
-      background: var(--accent);
-      color: white;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.95rem;
-      transition: background 0.15s;
-    }
-
-    .pdf-fallback .dl-link:hover { background: #1f3a55; }
-
-    /* ── Mobile ── */
     @media (max-width: 640px) {
       :root { --tab-h: 36px; }
-
       .topbar { padding: 0 0.6rem; }
-
-      .topbar-title {
-        font-size: 0.78rem;
-        margin-right: 0.6rem;
-      }
-
-      .tab {
-        padding: 0.3rem 0.7rem;
-        font-size: 0.68rem;
-      }
-
+      .topbar-title { font-size: 0.78rem; margin-right: 0.6rem; }
+      .tab { padding: 0.3rem 0.7rem; font-size: 0.68rem; }
       .disclaimer { display: none; }
-
-      .dl-btn {
-        font-size: 0.6rem;
-        padding: 0.2rem 0.45rem;
-      }
+      .dl-btn { font-size: 0.6rem; padding: 0.2rem 0.45rem; }
     }
 
     @media (max-width: 380px) {
@@ -243,24 +169,16 @@
       </button>
     </div>
     <div class="topbar-right">
-      <span class="disclaimer">Engineering estimate only · See Section 12 for limitations</span>
+      <span class="disclaimer">Engineering estimate only · See Section 9 for limitations</span>
       <a href="main.pdf" download="Zac_Climbing_Wall_Report.pdf" class="dl-btn">⬇ PDF</a>
     </div>
   </div>
 
   <div class="panel-wrap">
-    <!-- Report panel -->
     <div class="panel active" id="panel-report">
-      <iframe class="pdf-embed" data-src="main.pdf"></iframe>
-      <div class="pdf-fallback">
-        <div class="icon-big">📄</div>
-        <h2>Full Report</h2>
-        <p>Download the PDF to read the full analysis.</p>
-        <a href="main.pdf" download="Zac_Climbing_Wall_Report.pdf" class="dl-link">Download PDF</a>
-      </div>
+      <iframe class="pdf-embed" id="pdf-frame"></iframe>
     </div>
 
-    <!-- Charts panel -->
     <div class="panel" id="panel-charts">
       <iframe src="charts.html" loading="lazy" style="width:100%;height:100%;border:none;"></iframe>
     </div>
@@ -278,20 +196,16 @@
       if (e.key === '2') switchTab('charts');
     });
 
-    // Detect browsers that cannot render PDFs inline
+    // Desktop: embed PDF directly. Mobile: use Google Docs viewer.
     const ua = navigator.userAgent;
-    const isAndroid = /Android/i.test(ua);
-    const isChromeIOS = /CriOS/i.test(ua);
-    const isSamsungBrowser = /SamsungBrowser/i.test(ua);
-    const cannotEmbedPDF = isAndroid || isChromeIOS || isSamsungBrowser;
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
+    const frame = document.getElementById('pdf-frame');
+    const pdfURL = new URL('main.pdf', window.location.href).href;
 
-    if (!cannotEmbedPDF) {
-      const embed = document.querySelector('.pdf-embed');
-      embed.src = embed.dataset.src;
-      embed.classList.add('show');
-      document.querySelector('.pdf-fallback').classList.add('hide');
+    if (isMobile) {
+      frame.src = 'https://docs.google.com/gview?embedded=true&url=' + encodeURIComponent(pdfURL);
     } else {
-      document.querySelector('.dl-btn').classList.add('mobile-hide');
+      frame.src = 'main.pdf';
     }
   </script>
 
