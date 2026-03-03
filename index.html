@@ -269,6 +269,16 @@
       if (e.key === '1') switchTab('report');
       if (e.key === '2') switchTab('charts');
     });
+
+    // Mobile/touch devices can't render PDFs inline — show fallback
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || 
+                     ('ontouchstart' in window && window.innerWidth < 1024);
+    if (isMobile) {
+      const embed = document.querySelector('.pdf-embed');
+      const fallback = document.querySelector('.pdf-fallback');
+      if (embed) embed.style.display = 'none';
+      if (fallback) fallback.style.display = 'flex';
+    }
   </script>
 
 </body>
