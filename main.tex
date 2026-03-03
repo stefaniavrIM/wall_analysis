@@ -146,10 +146,10 @@ $L$ cancels:
 \]
 
 \vspace{0.5em}
-\textbf{Example:} $m = 100$ kg (climber), $M = 500$ kg (board), $\theta = 50°$
+\textbf{Example:} $m = 100$ kg (climber), $M = 500$ kg (board), $\theta = 50^\circ$
 
 \[
-\cot(50°) = 0.839
+\cot(50^\circ) = 0.839
 \]
 \[
 F_{\text{support}} = \left(100 + 250\right) \times 9.81 \times 0.839 \approx 2881\,\text{N}
@@ -196,7 +196,7 @@ The dyno range is conservative: measured peak forces at the fingers reach 1.1--1
 \section{Generalised Static Model}
 \label{sec:generalised}
 
-The simplified model assumed ideal conditions: straps pulling horizontally from the very top of the board. In reality the straps attach at $p = 0.75$ of the way up (274~cm) and angle downward at $\phi \approx 10°$ below horizontal. Both effects increase the strap force.
+The simplified model assumed ideal conditions: straps pulling horizontally from the very top of the board. In reality the straps attach at $p = 0.75$ of the way up (274~cm) and angle downward at $\phi \approx 10^\circ$ below horizontal. Both effects increase the strap force.
 
 \begin{figure}[H]
     \centering
@@ -226,7 +226,7 @@ $p$ & Strap attachment fraction along board (0.75) \\
 \end{center}
 
 \vspace{0.5em}
-The value $p = 0.75$ follows from the measured strap length of 234~cm (centre), eye bolt height of 200~cm, and base offset of 54~cm. The strap angle $\phi \approx 10°$ comes from the same geometry: the board attachment point sits about 42~cm above the eye bolt, over a horizontal run of 230~cm.
+The value $p = 0.75$ follows from the measured strap length of 234~cm (centre), eye bolt height of 200~cm, and base offset of 54~cm. The strap angle $\phi \approx 10^\circ$ comes from the same geometry: the board attachment point sits about 42~cm above the eye bolt, over a horizontal run of 230~cm.
 
 \subsection{Torques About the Pivot}
 
@@ -319,7 +319,7 @@ g \sin\delta
 
 The board is held up at two points: the pivot at the bottom and the strap attachment at 75\% of the way up. Between and beyond those supports, the board carries load like a beam, but beams can bend, crack, or snap if the forces are too high.
 
-Only the component of force \textit{perpendicular to the board} causes bending. For a board tilted 40\textdegree{} from vertical, that's $\sin(40°) \approx 64\%$ of the total weight. The perpendicular self-weight is $w_\perp = 861$~N/m and the climber's perpendicular load is $F_{c,\perp} = k \times 631$~N.
+Only the component of force \textit{perpendicular to the board} causes bending. For a board tilted 40\textdegree{} from vertical, that's $\sin(40^\circ) \approx 64\%$ of the total weight. The perpendicular self-weight is $w_\perp = 861$~N/m and the climber's perpendicular load is $F_{c,\perp} = k \times 631$~N.
 
 \subsection{Where the Board Is Most Stressed}
 
@@ -417,12 +417,9 @@ This gives margin above the $3\times$ static safety factor (4.58~kN per anchor) 
 \section{Final Risk Estimation}
 \label{sec:risk}
 
-
-
-
 \begin{table}[h]
 \centering
-\begin{tabular}{l l p{6.5cm}}
+\begin{tabular}{l p{3.5cm} p{6.5cm}}
 \hline
 \textbf{Scenario} & \textbf{Per-anchor demand} & \textbf{Verdict} \\
 \hline
@@ -437,15 +434,12 @@ Long-term fatigue / unequal loading & Varies & The real concern; existing cracks
 \label{tab:risk}
 \end{table}
 
-
 At 500~kg with equal load sharing, the system handles routine bouldering and dynos with comfortable margin, provided the anchors are rated $\geq 8\,\text{kN}$ and inspected regularly. At 800~kg the static numbers still look fine, but the margins depend heavily on how evenly the straps share load. With unequal sharing (likely, given different strap lengths and hand tensioning), a single anchor could see close to half the total force, and the existing wall cracks suggest anchor capacity may already be degrading.
 
-\newline
-\vspace{0.5em}
+\vspace{1em}
 \textbf{The dominant practical risks are unequal strap loading and long-term fatigue, monitoring and hardware upgrades matter more than refining the static numbers.}
 
 \vspace{0.5em}
-\newline
 \textbf{Real long-term and cumulative risks:}
 
 \begin{itemize}
@@ -481,7 +475,7 @@ A heavy wire rope bolted vertically to the boundary wall at top and bottom, sitt
 
 The force from the climbing board splits vectorially: the vertical component goes into the wire rope (tension, transferred to the wall through top and bottom bolts), and the horizontal component goes into the diagonal post (compression, directed down to the base and into the ground).
 
-I It converts the loading on the wall from pure pull-out (the weakest mode) into a combination of shear and bearing, and uses the ground to carry the horizontal component through the compression strut.
+It converts the loading on the wall from pure pull-out (the weakest mode) into a combination of shear and bearing, and uses the ground to carry the horizontal component through the compression strut.
 
 \subsection{B: Fourth Strap Higher Up the Board}
 \label{sec:fourth_strap}
@@ -520,7 +514,7 @@ The centre strap is currently 234~cm while the outer two are 227~cm. That 7~cm d
 \section{Limitations}
 \label{sec:limitations}
 
-This analysis is static-equivalent only; true transient response, vibration, and rate-dependent material behaviour are not modelled. No fatigue or cyclic assessment is included, though the existing crack pattern (Figure 5) may already evidence progressive damage. All forces assume equal load sharing across three straps. \textbf{In practice one anchor could briefly see close to the full load} and cascade failure if a strap or anchor lets go is not assessed. Lateral buckling of the board under compression, 3D strap geometry, and torsional effects are not analysed. All material properties are estimated from typical values, not tested. The climbing surface width was not measured; the section check in Section~\ref{sec:section_check} is parameterised in $b$ accordingly. Environmental degradation (UV, thermal cycling, creep) is noted but not projected over the service life. 
+This analysis is static-equivalent only; true transient response, vibration, and rate-dependent material behaviour are not modelled. No fatigue or cyclic assessment is included, though the existing crack pattern (Figure~\ref{fig:cracks}) may already evidence progressive damage. All forces assume equal load sharing across three straps. \textbf{In practice one anchor could briefly see close to the full load} and cascade failure if a strap or anchor lets go is not assessed. Lateral buckling of the board under compression, 3D strap geometry, and torsional effects are not analysed. All material properties are estimated from typical values, not tested. The climbing surface width was not measured; the section check in Section~\ref{sec:section_check} is parameterised in $b$ accordingly. Environmental degradation (UV, thermal cycling, creep) is noted but not projected over the service life.
 % =====================================================
 \section{Notes}
 \label{sec:notes}
