@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zac's Climbing Wall</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --accent: #16425B;
+      --cream: #F8F6F1;
+      --ink: #1A1A2E;
+      --rule: #C9BFA8;
+      --subtle: #6B7280;
+      --bg: #fdfcf9;
+      --tab-h: 52px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      height: var(--tab-h);
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+      gap: 0;
+      position: relative;
+      z-index: 10;
+    }
+
+    .topbar-title {
+      font-family: 'DM Serif Display', serif;
+      color: var(--cream);
+      font-size: 1.05rem;
+      font-weight: 400;
+      white-space: nowrap;
+      margin-right: 1.5rem;
+      opacity: 0.9;
+    }
+
+    .tab-group {
+      display: flex;
+      gap: 2px;
+      height: 100%;
+      align-items: flex-end;
+    }
+
+    .tab {
+      padding: 0.5rem 1.2rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      color: rgba(255,255,255,0.55);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      border-radius: 6px 6px 0 0;
+      transition: all 0.2s;
+      position: relative;
+      bottom: 0;
+    }
+
+    .tab:hover {
+      color: rgba(255,255,255,0.8);
+      background: rgba(255,255,255,0.06);
+    }
+
+    .tab.active {
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    .tab-icon {
+      margin-right: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .topbar-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .disclaimer {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.55rem;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .dl-btn {
+      padding: 0.3rem 0.7rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--cream);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .dl-btn:hover {
+      background: white;
+    }
+
+    /* ── Content panels ── */
+    .panel-wrap {
+      height: calc(100vh - var(--tab-h));
+      position: relative;
+    }
+
+    .panel {
+      position: absolute;
+      inset: 0;
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    .panel iframe, .panel embed, .panel object {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* ── PDF fallback for mobile ── */
+    .pdf-fallback {
+      display: none;
+      height: 100%;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      text-align: center;
+      background: var(--bg);
+    }
+
+    .pdf-fallback .icon-big { font-size: 3rem; margin-bottom: 1rem; }
+
+    .pdf-fallback h2 {
+      font-family: 'DM Serif Display', serif;
+      font-weight: 400;
+      font-size: 1.3rem;
+      color: var(--accent);
+      margin-bottom: 0.3rem;
+    }
+
+    .pdf-fallback p {
+      font-size: 0.85rem;
+      color: var(--subtle);
+      margin-bottom: 1.5rem;
+      max-width: 280px;
+      line-height: 1.5;
+    }
+
+    .pdf-fallback .dl-link {
+      display: inline-block;
+      padding: 0.8rem 2rem;
+      background: var(--accent);
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: background 0.15s;
+    }
+
+    .pdf-fallback .dl-link:hover { background: #1f3a55; }
+
+    /* ── Mobile ── */
+    @media (max-width: 640px) {
+      :root { --tab-h: 46px; }
+
+      .topbar { padding: 0 0.6rem; }
+
+      .topbar-title {
+        font-size: 0.9rem;
+        margin-right: 0.8rem;
+      }
+
+      .tab {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.72rem;
+      }
+
+      .disclaimer { display: none; }
+
+      .dl-btn {
+        font-size: 0.65rem;
+        padding: 0.25rem 0.5rem;
+      }
+
+      /* Show fallback on mobile, hide embed */
+      .pdf-embed { display: none !important; }
+      .pdf-fallback { display: flex !important; }
+    }
+
+    @media (max-width: 380px) {
+      .topbar-title { font-size: 0.8rem; margin-right: 0.5rem; }
+      .tab { padding: 0.35rem 0.6rem; font-size: 0.68rem; }
+      .tab-icon { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-title">Zac's Climbing Wall</div>
+    <div class="tab-group">
+      <button class="tab active" data-panel="report" onclick="switchTab('report')">
+        <span class="tab-icon">📄</span>Report
+      </button>
+      <button class="tab" data-panel="charts" onclick="switchTab('charts')">
+        <span class="tab-icon">📊</span>Charts
+      </button>
+    </div>
+    <div class="topbar-right">
+      <span class="disclaimer">Engineering estimate only · See Section 12 for limitations</span>
+      <a href="main.pdf" download="Zac_Climbing_Wall_Report.pdf" class="dl-btn">⬇ PDF</a>
+    </div>
+  </div>
+
+  <div class="panel-wrap">
+    <!-- Report panel -->
+    <div class="panel active" id="panel-report">
+      <embed src="main.pdf" type="application/pdf" class="pdf-embed">
+      <div class="pdf-fallback">
+        <div class="icon-big">📄</div>
+        <h2>Full Report</h2>
+        <p>PDF viewer isn't available on this device. Tap below to download and open in your reader.</p>
+        <a href="main.pdf" download="Zac_Climbing_Wall_Report.pdf" class="dl-link">Download PDF</a>
+      </div>
+    </div>
+
+    <!-- Charts panel -->
+    <div class="panel" id="panel-charts">
+      <iframe src="charts.html" loading="lazy"></iframe>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(name) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.panel === name));
+      document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
+    }
+
+    // Keyboard shortcut: 1 = report, 2 = charts
+    document.addEventListener('keydown', e => {
+      if (e.target.tagName === 'INPUT') return;
+      if (e.key === '1') switchTab('report');
+      if (e.key === '2') switchTab('charts');
+    });
+  </script>
+
+</body>
+</html>
