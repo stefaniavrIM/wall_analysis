@@ -63,7 +63,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);line
 
 .chart-row{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-top:1.2rem;}
 .chart-card{background:white;border:1px solid var(--rule);border-radius:6px;padding:1rem 1rem 0.7rem;}
-.chart-card.standalone{margin-top:0.8rem;}
 .chart-card h3{font-family:'DM Serif Display',serif;font-size:0.95rem;font-weight:400;color:var(--accent);margin-bottom:0.1rem;}
 .chart-desc{font-size:0.72rem;color:var(--subtle);margin-bottom:0.5rem;line-height:1.45;}
 .chart-wrap{position:relative;height:200px;}
@@ -74,7 +73,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);line
 .limit-warning{background:#fdf6ec;border:1px solid #e0c98d;color:#8a6914;border-radius:6px;padding:0.6rem 0.9rem;font-size:0.78rem;margin:0.6rem 0;display:none;}
 .limit-warning.visible{display:block;}
 
-/* ── Mobile: tablets / large phones ── */
 @media(max-width:700px){
   .controls-bar{position:relative;top:auto;box-shadow:none;border-bottom:2px solid var(--rule);}
   .controls-grid{grid-template-columns:1fr 1fr;gap:0.6rem 0.8rem;}
@@ -92,7 +90,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);line
   .safety-bar{flex-direction:row;flex-wrap:wrap;padding:0.7rem 0.8rem;font-size:0.82rem;}
 }
 
-/* ── Mobile: small phones ── */
 @media(max-width:480px){
   .controls-bar{padding:0.7rem 0.8rem;}
   .controls-grid{grid-template-columns:1fr 1fr;gap:0.5rem 0.6rem;}
@@ -122,7 +119,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);line
   .limit-warning{font-size:0.72rem;padding:0.5rem 0.7rem;}
 }
 
-/* ── Mobile: very small phones ── */
 @media(max-width:360px){
   .controls-grid{grid-template-columns:1fr;gap:0.4rem;}
   .control-group .vd{font-size:0.8rem;}
@@ -134,7 +130,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);line
 </head>
 <body>
 
-<div style="background:var(--cream);border-bottom:1px solid var(--rule);padding:0.35rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:var(--subtle);text-align:center;letter-spacing:0.02em;">Engineering estimate · Not a substitute for professional inspection · See Section 12 of the report for limitations</div>
+<div style="background:var(--cream);border-bottom:1px solid var(--rule);padding:0.35rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:var(--subtle);text-align:center;letter-spacing:0.02em;">Engineering estimate · Not a substitute for professional inspection · See Section 9 of the report for limitations</div>
 
 <div style="padding:0.6rem 1rem 0.3rem;text-align:center;font-size:0.82rem;color:var(--ink);max-width:900px;margin:0 auto;">Adjust the sliders below to explore how forces change with different parameters.</div>
 
@@ -191,7 +187,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);line
     <div class="eq-section">
       <div class="eq-label">Generalised model (climber at top of board)</div>
       <div class="eq-math" id="eq-general"></div>
-      <div class="eq-note">Dynamic scenarios multiply the climber's contribution by k: 1.5 (normal), 2 (push‑off), 3 (dyno).</div>
+      <div class="eq-note">Dynamic scenarios multiply the climber's contribution by k: 1.5 (steady climbing), 2 (push‑off), 3 (dyno).</div>
     </div>
     <div class="eq-section">
       <div class="eq-label">With your values</div>
@@ -229,16 +225,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);line
   <div class="info-box">
     <strong>Safety factor</strong> = anchor rating ÷ worst per‑anchor demand (dyno, k = 3). It tells you how many times stronger the anchor is than what it actually needs to handle. Above 2.5× is comfortable. 1.5× to 2.5× needs caution. Below 1.5× is not safe.
     <div class="info-note"><span class="icon">⚠️</span> Per‑anchor values assume perfect load sharing; in practice one strap may carry most of the load.</div>
-    <div class="info-note"><span class="icon">📄</span> Impact catches (Section 7 of the PDF) can reach 18–37 kN total, but are unlikely at typical angles.</div>
   </div>
 
-  <!-- Bar charts row -->
   <hr class="section-divider">
   <div class="section-label">Scenario Comparison</div>
   <div class="chart-row">
     <div class="chart-card">
       <h3>Strap Force by Scenario</h3>
-      <div class="chart-desc">Total force across all three straps for each loading scenario. Impact scenario not shown (see note above).</div>
+      <div class="chart-desc">Total force across all three straps for each loading scenario.</div>
       <div class="chart-wrap"><canvas id="chart-scenarios"></canvas></div>
     </div>
     <div class="chart-card">
@@ -248,7 +242,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);line
     </div>
   </div>
 
-  <!-- Line charts row -->
   <hr class="section-divider">
   <div class="section-label">Sensitivity Analysis</div>
   <div class="chart-row">
@@ -279,7 +272,6 @@ function getP(){
 }
 function rad(d){return d*Math.PI/180;}
 
-// F = (k·m·rF + M/2)·g·cosθ / [p·sin(θ−φ)]
 function calcF(m,M,theta,p,phi,k,rF){
   const thetaMinusPhi=theta-phi;
   if(thetaMinusPhi<=5)return null;
@@ -299,7 +291,6 @@ Chart.defaults.plugins.legend.labels.font={size:10};
 
 const CC={accent:'rgb(22,66,91)',accentA:a=>`rgba(22,66,91,${a})`,sand:'rgb(212,163,115)',sandA:a=>`rgba(212,163,115,${a})`,warn:'rgb(155,34,38)',warnA:a=>`rgba(155,34,38,${a})`};
 
-// ── Plugin: vertical line at current θ (for angle chart) ──
 const verticalLinePlugin={
   id:'verticalLine',
   afterDatasetsDraw(chart){
@@ -328,7 +319,6 @@ const verticalLinePlugin={
   }
 };
 
-// ── Plugin: vertical line at current p (for p chart) ──
 let currentP=0.75;
 const verticalLinePPlugin={
   id:'verticalLineP',
@@ -358,7 +348,6 @@ const verticalLinePPlugin={
   }
 };
 
-// ── Plugin: data labels on bar charts ──
 const barLabelPlugin={
   id:'barLabels',
   afterDatasetsDraw(chart){
@@ -382,19 +371,17 @@ const barLabelPlugin={
   }
 };
 
-// ── Chart 1: Scenarios (bar) ──────────
 const chartScenarios=new Chart(document.getElementById('chart-scenarios'),{
   type:'bar',
-  data:{labels:['Static','Normal','Push off','Dyno'],
+  data:{labels:['Static','Steady climbing','Push off','Dyno'],
     datasets:[{data:[0,0,0,0],backgroundColor:[CC.accentA(0.55),CC.sandA(0.6),CC.sandA(0.8),CC.warnA(0.65)],borderColor:[CC.accent,CC.sand,CC.sand,CC.warn],borderWidth:1.5,borderRadius:3}]},
   plugins:[barLabelPlugin],
   options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,title:{display:true,text:'Total Force (kN)',font:{size:11}},grid:{color:'rgba(0,0,0,0.08)'}},x:{grid:{display:false},ticks:{font:{size:10}}}}}
 });
 
-// ── Chart 2: Per anchor (bar + line) ──
 const chartAnchors=new Chart(document.getElementById('chart-anchors'),{
   type:'bar',
-  data:{labels:['Static','Normal','Push off','Dyno'],
+  data:{labels:['Static','Steady climbing','Push off','Dyno'],
     datasets:[
       {label:'Per anchor',data:[0,0,0,0],backgroundColor:CC.accentA(0.6),borderColor:CC.accent,borderWidth:1.5,borderRadius:3},
       {label:'Anchor rating',data:[0,0,0,0],type:'line',borderColor:CC.warn,borderWidth:2,borderDash:[5,3],pointRadius:0,fill:false}
@@ -403,12 +390,11 @@ const chartAnchors=new Chart(document.getElementById('chart-anchors'),{
   options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:18}},plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,title:{display:true,text:'Force / Anchor (kN)',font:{size:11}},grid:{color:'rgba(0,0,0,0.08)'}},x:{grid:{display:false},ticks:{font:{size:10}}}}}
 });
 
-// ── Chart 3: Force vs angle (θ) ──
 const chartAngle=new Chart(document.getElementById('chart-angle'),{
   type:'scatter',
   data:{datasets:[
     {label:'Static (k = 1)',data:[],borderColor:CC.accent,backgroundColor:'transparent',borderWidth:2,fill:false,showLine:true,tension:0.3,pointRadius:0},
-    {label:'Normal (k = 1.5)',data:[],borderColor:CC.sand,backgroundColor:'transparent',borderWidth:1.5,borderDash:[4,3],fill:false,showLine:true,tension:0.3,pointRadius:0},
+    {label:'Steady climbing (k = 1.5)',data:[],borderColor:CC.sand,backgroundColor:'transparent',borderWidth:1.5,borderDash:[4,3],fill:false,showLine:true,tension:0.3,pointRadius:0},
     {label:'Dyno (k = 3)',data:[],borderColor:CC.warn,backgroundColor:'transparent',borderWidth:2,fill:false,showLine:true,tension:0.3,pointRadius:0}
   ]},
   plugins:[verticalLinePlugin],
@@ -427,12 +413,11 @@ const chartAngle=new Chart(document.getElementById('chart-angle'),{
   }
 });
 
-// ── Chart 4: Force vs strap position (p) ──
 const chartP=new Chart(document.getElementById('chart-p'),{
   type:'scatter',
   data:{datasets:[
     {label:'Static (k = 1)',data:[],borderColor:CC.accent,backgroundColor:'transparent',borderWidth:2,fill:false,showLine:true,tension:0.3,pointRadius:0},
-    {label:'Normal (k = 1.5)',data:[],borderColor:CC.sand,backgroundColor:'transparent',borderWidth:1.5,borderDash:[4,3],fill:false,showLine:true,tension:0.3,pointRadius:0},
+    {label:'Steady climbing (k = 1.5)',data:[],borderColor:CC.sand,backgroundColor:'transparent',borderWidth:1.5,borderDash:[4,3],fill:false,showLine:true,tension:0.3,pointRadius:0},
     {label:'Dyno (k = 3)',data:[],borderColor:CC.warn,backgroundColor:'transparent',borderWidth:2,fill:false,showLine:true,tension:0.3,pointRadius:0}
   ]},
   plugins:[verticalLinePPlugin],
@@ -486,7 +471,7 @@ function update(){
     document.getElementById('safety-detail').textContent='θ − φ ≤ 5°. The straps cannot hold the board at this angle.';
     chartScenarios.data.datasets[0].data=[0,0,0,0];chartScenarios.update('none');
     chartAnchors.data.datasets[0].data=[0,0,0,0];chartAnchors.data.datasets[1].data=[aR,aR,aR,aR];chartAnchors.update('none');
-    drawAngleAndP(m,M,p,phi); // update both line charts with empty? but we call draw functions anyway
+    drawAngleAndP(m,M,p,phi);
     return;
   }
 
@@ -518,7 +503,6 @@ function update(){
 
 function drawAngleAndP(m,M,p,phi){
   currentP=p;
-  // Update angle chart (θ from 20 to 80, but respect theta-phi>5)
   const dAngleStatic=[],dAngleNormal=[],dAngleDyno=[];
   const minTheta=Math.max(phi+6,20);
   for(let th=minTheta;th<=80;th++){
@@ -535,7 +519,6 @@ function drawAngleAndP(m,M,p,phi){
   chartAngle.options.scales.x.max=80;
   chartAngle.update('none');
 
-  // Update p chart (p from 0.5 to 1.0, fixed current θ, φ)
   const dPStatic=[],dPNormal=[],dPDyno=[];
   for(let px=0.5; px<=1.0; px+=0.01){
     const fs=calcF(m,M,currentTheta,px,phi,1,1);
